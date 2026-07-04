@@ -49,13 +49,15 @@ const Layout: React.FC<LayoutProps> = ({ children, title = 'Rotary Ireland Hub' 
               priority
             />
           </Link>
-          <nav className="hidden md:block">
-            <ul className="flex space-x-6">
-              <li><Link href="/" className="hover:text-rotary-gold transition">Home</Link></li>
-              <li><Link href="/projects" className="hover:text-rotary-gold transition">Projects</Link></li>
-              <li><Link href="/dashboard" className="hover:text-rotary-gold transition">Dashboard</Link></li>
-            </ul>
-          </nav>
+          {session && (
+            <nav className="hidden md:block">
+              <ul className="flex space-x-6">
+                <li><Link href="/" className="hover:text-rotary-gold transition">Home</Link></li>
+                <li><Link href="/projects" className="hover:text-rotary-gold transition">Projects</Link></li>
+                <li><Link href="/dashboard" className="hover:text-rotary-gold transition">Dashboard</Link></li>
+              </ul>
+            </nav>
+          )}
           <div className="flex items-center space-x-4">
             {session ? (
               <>
