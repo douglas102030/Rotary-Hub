@@ -48,6 +48,9 @@ export async function initDatebase() {
     await ensureColumn('projects', 'crowdfunder_url', 'TEXT');
     await ensureColumn('projects', 'gofundme_url', 'TEXT');
     await ensureColumn('projects', 'last_progress_update', 'DATETIME');
+    
+    // Ensure featured column exists for homepage display
+    await ensureColumn('projects', 'is_featured', 'BOOLEAN DEFAULT 0');
 
     // Pre-access requests
     await client.execute(`

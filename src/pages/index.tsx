@@ -1,10 +1,39 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Layout from '../components/Layout';
+import { useSession } from 'next-auth/react';
 
 const CURRENT_YEAR = 2026;
 
+interface Project {
+  id: number;
+  title: string;
+  description: string;
+  main_image?: string;
+}
+
 const HomePage: React.FC = () => {
+  const { data: session } = useSession();
+  const [featuredProjects, setFeaturedProjects] = useState<Project[]>([]);
+  const isAdmin = session?.user?.role === 'admin';
+
+  useEffect(() => {
+    const fetchFeaturedProjects = async () => {
+      try {
+        const response = await fetch('/api/projects/featured');
+        if (response.ok) {
+          const data = await response.json();
+          setFeaturedProjects(data.projects || []);
+        }
+      } catch (error) {
+        console.error('Error fetching featured projects:', error);
+      }
+    };
+    
+    fetchFeaturedProjects();
+  }, []);
+
   return (
     <Layout title="Rotary Club HUB Projects">
       {/* Hero Section */}
@@ -47,6 +76,156 @@ const HomePage: React.FC = () => {
 
             <p className="text-gray-400 text-sm mt-6">Join more than {CURRENT_YEAR} Rotary members around the world</p>
           </div>
+        </div>
+      </section>
+
+      {/* Rotary Information Section */}
+      <section className="py-20 bg-gradient-to-r from-blue-50 to-indigo-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl lg:text-5xl font-bold text-rotary-blue mb-4">
+              About Rotary International
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Building communities where together we see a future where people unite and take action to create lasting change.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-12">
+            {/* Rotary International */}
+            <div className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-all duration-300 border-t-4 border-rotary-blue">
+              <div className="text-4xl mb-4">🌍</div>
+              <h3 className="text-2xl font-bold text-rotary-blue mb-4">Rotary International</h3>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                Founded in 1905, Rotary International is a global organization of 1.4+ million Rotarians in nearly every country. We work locally and globally to tackle the world's toughest challenges.
+              </p>
+              <ul className="text-sm text-gray-600 space-y-2">
+                <li>✓ <strong>192 countries</strong> and geographical areas</li>
+                <li>✓ <strong>35,000+ clubs</strong> worldwide</li>
+                <li>✓ <strong>Committed to 6 areas of focus:</strong></li>
+                <li className="ml-4">• Disease Prevention & Treatment</li>
+                <li className="ml-4">• Maternal & Child Health</li>
+                <li className="ml-4">• Water, Sanitation & Hygiene</li>
+                <li className="ml-4">• Basic Education & Literacy</li>
+                <li className="ml-4">• Economic & Community Development</li>
+                <li className="ml-4">• Peace & Conflict Resolution</li>
+              </ul>
+            </div>
+
+            {/* Rotary Ireland */}
+            <div className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-all duration-300 border-t-4 border-green-600">
+              <div className="text-4xl mb-4">🇮🇪</div>
+              <h3 className="text-2xl font-bold text-green-700 mb-4">Rotary Ireland</h3>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                Rotary in Ireland comprises over 60 clubs working together to make a meaningful difference in Irish communities and globally.
+              </p>
+              <ul className="text-sm text-gray-600 space-y-2">
+                <li>✓ <strong>60+ active Rotary clubs</strong></li>
+                <li>✓ <strong>Supporting local communities</strong> through various projects</li>
+                <li>✓ <strong>Focus areas:</strong></li>
+                <li className="ml-4">• Community development</li>
+                <li className="ml-4">• Youth initiatives</li>
+                <li className="ml-4">• International service</li>
+                <li className="ml-4">• Health & welfare programs</li>
+              </ul>
+            </div>
+
+            {/* Rotary UK & Ireland */}
+            <div className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-all duration-300 border-t-4 border-blue-700">
+              <div className="text-4xl mb-4">🇬🇧</div>
+              <h3 className="text-2xl font-bold text-blue-800 mb-4">Rotary UK & Ireland</h3>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                With over 650 clubs across the UK and Ireland, Rotary is delivering real, lasting change to communities.
+              </p>
+              <ul className="text-sm text-gray-600 space-y-2">
+                <li>✓ <strong>650+ clubs</strong> united in service</li>
+                <li>✓ <strong>Active regions:</strong> England, Scotland, Wales, Northern Ireland</li>
+                <li>✓ <strong>Latest Initiatives:</strong></li>
+                <li className="ml-4">• Tackling homelessness</li>
+                <li className="ml-4">• Supporting mental health</li>
+                <li className="ml-4">• Youth and education programs</li>
+                <li className="ml-4">• Environmental sustainability</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Projects Section */}
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <h2 className="text-4xl lg:text-5xl font-bold text-rotary-blue mb-2">
+                Featured Projects
+              </h2>
+              <p className="text-xl text-gray-600">
+                Showcase the most impactful Rotary projects
+              </p>
+            </div>
+            {isAdmin && (
+              <Link 
+                href="/admin/featured-projects"
+                className="inline-flex items-center px-6 py-3 bg-rotary-gold text-white font-semibold rounded-lg hover:bg-yellow-600 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Manage Featured
+              </Link>
+            )}
+          </div>
+
+          {featuredProjects.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {featuredProjects.map((project) => (
+                <Link 
+                  key={project.id}
+                  href={`/projects/${project.id}`}
+                  className="group bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden cursor-pointer transform hover:-translate-y-2"
+                >
+                  <div className="relative h-48 bg-gradient-to-br from-rotary-blue to-blue-700 overflow-hidden">
+                    {project.main_image ? (
+                      <Image
+                        src={project.main_image}
+                        alt={project.title}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-rotary-blue transition-colors">
+                      {project.title}
+                    </h3>
+                    <p className="text-gray-600 text-sm line-clamp-2">
+                      {project.description}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-gray-50 rounded-xl">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+              <p className="text-gray-500 text-lg">No featured projects yet</p>
+              {isAdmin && (
+                <p className="text-gray-400 text-sm mt-2">
+                  <Link href="/admin/featured-projects" className="text-rotary-gold hover:underline">
+                    Add your first featured project
+                  </Link>
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
@@ -185,24 +364,6 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-blue-950 py-4 border-t border-white/10">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-3 text-xs md:text-sm">
-            <p className="text-gray-400">&copy; {CURRENT_YEAR} Rotary Club HUB Projects</p>
-            
-            <div className="flex flex-wrap justify-center gap-3 md:gap-5">
-              <a href="#" className="text-gray-400 hover:text-yellow-500 transition-colors">Terms of Use</a>
-              <a href="#" className="text-gray-400 hover:text-yellow-500 transition-colors">Privacy Policy</a>
-              <a href="#" className="text-gray-400 hover:text-yellow-500 transition-colors">Support</a>
-            </div>
-
-            <p className="text-gray-500">By <span className="text-yellow-500 font-medium">Douglas Ottolini</span> | <span className="text-yellow-500 font-medium">DNOB Tech</span></p>
-          </div>
-        </div>
-      </footer>
-
     </Layout>
   );
 };
