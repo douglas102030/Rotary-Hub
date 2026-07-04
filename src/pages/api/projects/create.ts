@@ -1,0 +1,108 @@
+import { NextApiRequest, NextApiResponse } from 'next';
+import { getSession } from 'next-auth/react';
+import { getDatabase } from '../../../lib/database';
+
+interface ProjectCreateRequest {
+  title: string;
+  clubName: string;
+  category: string;
+  location: string;
+  description: string;
+  status: string;
+  startDate: string;
+  endDate: string;
+  fundraisingLink: string;
+  externalLinks: string;
+  contactPerson: string;
+  images: Array<{
+    id: string;
+    src: string;
+    name: string;
+    isExternal?: boolean;
+  }>;
+}
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method not allowed' });
+  }
+
+  try {
+    // Check authentication
+    const session = await getSession({ req });
+    if (!session || !session.user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const { title, clubName, category, location, description, status, startDate, endDate, fundraisingLink, externalLinks, contactPerson, images } = req.body as ProjectCreateRequest;
+
+    // Validate required fields
+    if (!title || !clubName || !category || !location) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const db = await getDatabase();
+
+    // Get user ID from database (by email)
+    const userResult = await db.execute({
+      sql: 'SELECT id FROM users WHERE email = ?',
+      args: [(session.user as any).email]
+    });
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const userId = (userResult.rows[0] as any).id;
+
+    // Insert project
+    const projectResult = await db.execute({
+      sql: `INSERT INTO projects (title, club_name, category, location, description, status, start_date, end_date, fundraising_link, external_links, contact_person, created_by) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [title, clubName, category, location, description, status, startDate || null, endDate || null, fundraisingLink || null, externalLinks || null, contactPerson || null, userId]
+    });
+
+    const projectId = (projectResult as any).lastInsertRowid;
+
+    // Insert project photos (if any)
+    if (images && images.length > 0) {
+      for (let i = 0; i < images.length; i++) {
+        const image = images[i];
+        
+        // If it's an external URL (from GoFundMe), store the URL directly
+        // If it's a base64 data URL, we would need to handle it differently
+        let imageUrl = image.src;
+        
+        // For now, just store the image URL/data URL in the database
+        // In production, you might want to upload base64 images to cloud storage
+        await db.execute({
+          sql: 'INSERT INTO project_photos (project_id, image_url) VALUES (?, ?)',
+          args: [projectId, imageUrl]
+        });
+
+        // Set first image as main image if not already set
+        if (i === 0) {
+          await db.execute({
+            sql: 'UPDATE projects SET main_image = ? WHERE id = ?',
+            args: [imageUrl, projectId]
+          });
+        }
+      }
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: 'Project created successfully',
+      projectId: projectId
+    });
+  } catch (error) {
+    console.error('Error creating project:', error);
+    return res.status(500).json({
+      message: 'Error creating project',
+      error: (error as Error).message
+    });
+  }
+}

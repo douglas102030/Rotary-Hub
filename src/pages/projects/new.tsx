@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
+import { useSession } from 'next-auth/react';
 import Layout from '../../components/Layout';
 
 interface ProjectImage {
@@ -10,6 +12,28 @@ interface ProjectImage {
 }
 
 const NewProjectPage: React.FC = () => {
+  const router = useRouter();
+  const { data: session, status } = useSession();
+
+  // Redirect to login if not authenticated
+  if (status === 'loading') {
+    return (
+      <Layout title="Create New Project">
+        <div className="flex justify-center items-center h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rotary-blue mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (status === 'unauthenticated') {
+    router.push('/login');
+    return null;
+  }
+
   const [formData, setFormData] = useState({
     title: '',
     clubName: '',
@@ -28,6 +52,7 @@ const NewProjectPage: React.FC = () => {
   const [images, setImages] = useState<ProjectImage[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [isLoadingGoFundMe, setIsLoadingGoFundMe] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -151,11 +176,78 @@ const NewProjectPage: React.FC = () => {
     setImages(images.filter(img => img.id !== id));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Submitted form:', formData);
-    console.log('Images:', images);
-    alert('Project created successfully!');
+    
+    // Validate required fields
+    if (!formData.title || !formData.clubName || !formData.category || !formData.location) {
+      setFeedbackMessage({ 
+        type: 'error', 
+        text: 'Please fill in all required fields (Title, Club, Category, Location)' 
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setFeedbackMessage(null);
+
+    try {
+      const response = await fetch('/api/projects/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          images: images
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setFeedbackMessage({ 
+          type: 'error', 
+          text: data.message || 'Failed to create project' 
+        });
+        return;
+      }
+
+      setFeedbackMessage({ 
+        type: 'success', 
+        text: '✅ Project created successfully! Redirecting...' 
+      });
+
+      // Reset form
+      setFormData({
+        title: '',
+        clubName: '',
+        category: '',
+        location: '',
+        description: '',
+        status: 'draft',
+        startDate: '',
+        endDate: '',
+        fundraisingLink: '',
+        goFundMeUrl: '',
+        externalLinks: '',
+        contactPerson: '',
+      });
+      setImages([]);
+
+      // Redirect to projects page after 2 seconds
+      setTimeout(() => {
+        router.push('/projects');
+      }, 2000);
+    } catch (error) {
+      console.error('Error creating project:', error);
+      setFeedbackMessage({ 
+        type: 'error', 
+        text: 'An error occurred while creating the project' 
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -481,15 +573,28 @@ const NewProjectPage: React.FC = () => {
           <div className="flex justify-end space-x-4">
             <button
               type="button"
+              onClick={() => window.history.back()}
               className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+              disabled={isSubmitting}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="btn-primary px-4 py-2"
+              className="btn-primary px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              disabled={isSubmitting}
             >
-              Create Project
+              {isSubmitting ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Creating...
+                </>
+              ) : (
+                'Create Project'
+              )}
             </button>
           </div>
         </form>
