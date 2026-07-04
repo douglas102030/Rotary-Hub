@@ -26,10 +26,89 @@ const NewProjectPage: React.FC = () => {
 
   const [images, setImages] = useState<ProjectImage[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const [isLoadingGoFundMe, setIsLoadingGoFundMe] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const extractGoFundMeData = async () => {
+    if (!formData.goFundMeUrl) {
+      setFeedbackMessage({ type: 'error', text: 'Please enter a GoFundMe URL first' });
+      return;
+    }
+
+    setIsLoadingGoFundMe(true);
+    setFeedbackMessage(null);
+
+    try {
+      const response = await fetch('/api/gofundme/extract', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: formData.goFundMeUrl })
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        setFeedbackMessage({ type: 'error', text: data.message || 'Failed to extract data' });
+        return;
+      }
+
+      // Popular os campos automaticamente
+      setFormData(prev => ({
+        ...prev,
+        title: data.title || prev.title,
+        description: data.description || prev.description,
+        fundraisingLink: formData.goFundMeUrl
+      }));
+
+      // Carregar imagens extraídas
+      if (data.images && data.images.length > 0) {
+        data.images.forEach((imageUrl: string, index: number) => {
+          // Carregar imagem a partir da URL
+          const img = new window.Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => {
+            try {
+              const canvas = document.createElement('canvas');
+              canvas.width = img.width;
+              canvas.height = img.height;
+              const ctx = canvas.getContext('2d');
+              if (ctx) {
+                ctx.drawImage(img, 0, 0);
+                const dataUrl = canvas.toDataURL('image/jpeg');
+                setImages(prev => [...prev, {
+                  id: Math.random().toString(36),
+                  src: dataUrl,
+                  name: `GoFundMe-Photo-${index + 1}.jpg`
+                }]);
+              }
+            } catch (err) {
+              console.error('Error processing image:', err);
+            }
+          };
+          img.src = imageUrl;
+        });
+
+        setFeedbackMessage({ 
+          type: 'success', 
+          text: `Successfully extracted project data! Added ${data.images.length} images.` 
+        });
+      } else {
+        setFeedbackMessage({ 
+          type: 'success', 
+          text: 'Successfully extracted project data! No images found.' 
+        });
+      }
+    } catch (error) {
+      console.error('Error extracting data:', error);
+      setFeedbackMessage({ type: 'error', text: 'An error occurred while extracting data' });
+    } finally {
+      setIsLoadingGoFundMe(false);
+    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -279,16 +358,32 @@ const NewProjectPage: React.FC = () => {
                 <label htmlFor="goFundMeUrl" className="block text-sm font-medium text-gray-700 mb-1">
                   GoFundMe Campaign URL
                 </label>
-                <input
-                  type="url"
-                  id="goFundMeUrl"
-                  name="goFundMeUrl"
-                  value={formData.goFundMeUrl}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rotary-blue"
-                  placeholder="https://www.gofundme.com/f/your-campaign"
-                />
-                <p className="mt-1 text-xs text-gray-500">Add a GoFundMe campaign to display live fundraising progress</p>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    id="goFundMeUrl"
+                    name="goFundMeUrl"
+                    value={formData.goFundMeUrl}
+                    onChange={handleChange}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rotary-blue"
+                    placeholder="https://www.gofundme.com/f/your-campaign"
+                  />
+                  <button
+                    type="button"
+                    onClick={extractGoFundMeData}
+                    disabled={isLoadingGoFundMe || !formData.goFundMeUrl}
+                    className="px-4 py-2 bg-rotary-gold text-rotary-blue font-medium rounded-md hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed transition whitespace-nowrap"
+                  >
+                    {isLoadingGoFundMe ? 'Loading...' : '✨ Auto-fill'}
+                  </button>
+                </div>
+                <p className="mt-1 text-xs text-gray-500">Paste a GoFundMe URL and click &quot;Auto-fill&quot; to extract project name, description, and images automatically!</p>
+                
+                {feedbackMessage && (
+                  <div className={`mt-2 p-2 rounded text-sm ${feedbackMessage.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                    {feedbackMessage.text}
+                  </div>
+                )}
               </div>
 
               <div>
