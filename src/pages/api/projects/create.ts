@@ -21,6 +21,7 @@ interface ProjectCreateRequest {
     name: string;
     isExternal?: boolean;
   }>;
+  mainImageId?: string;
 }
 
 export default async function handler(
@@ -41,7 +42,7 @@ export default async function handler(
 
     console.log('Session found:', { email: session.user.email, id: (session.user as any).id });
 
-    const { title, clubName, category, location, description, status, startDate, endDate, fundraisingLink, externalLinks, contactPerson, images } = req.body as ProjectCreateRequest;
+    const { title, clubName, category, location, description, status, startDate, endDate, fundraisingLink, externalLinks, contactPerson, images, mainImageId } = req.body as ProjectCreateRequest;
 
     // Validate required fields
     if (!title || !clubName || !category || !location) {
@@ -117,31 +118,34 @@ export default async function handler(
 
     console.log('Project created with ID:', projectId);
 
-    console.log('Project created with ID:', projectId);
-
     // Insert project photos (if any)
     if (images && images.length > 0) {
+      let mainImageUrl: string | null = null;
+
       for (let i = 0; i < images.length; i++) {
         const image = images[i];
-        
-        // If it's an external URL (from GoFundMe), store the URL directly
-        // If it's a base64 data URL, we would need to handle it differently
         let imageUrl = image.src;
         
-        // For now, just store the image URL/data URL in the database
-        // In production, you might want to upload base64 images to cloud storage
+        // Insert photo
         await db.execute({
           sql: 'INSERT INTO project_photos (project_id, image_url) VALUES (?, ?)',
           args: [projectId, imageUrl]
         });
 
-        // Set first image as main image if not already set
-        if (i === 0) {
-          await db.execute({
-            sql: 'UPDATE projects SET main_image = ? WHERE id = ?',
-            args: [imageUrl, projectId]
-          });
+        // Determine main image: use mainImageId if provided, otherwise first image
+        if (mainImageId && image.id === mainImageId) {
+          mainImageUrl = imageUrl;
+        } else if (!mainImageId && i === 0) {
+          mainImageUrl = imageUrl;
         }
+      }
+
+      // Update main_image if we found one
+      if (mainImageUrl) {
+        await db.execute({
+          sql: 'UPDATE projects SET main_image = ? WHERE id = ?',
+          args: [mainImageUrl, projectId]
+        });
       }
     }
 

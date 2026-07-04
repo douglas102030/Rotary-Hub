@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import Image from 'next/image';
 import Layout from '../../components/Layout';
 
 interface Project {
@@ -13,6 +15,7 @@ interface Project {
 }
 
 const ProjectsPage: React.FC = () => {
+  const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,9 +40,35 @@ const ProjectsPage: React.FC = () => {
 
     fetchProjects();
   }, []);
+
+  const truncateText = (text: string, maxLength: number = 120) => {
+    if (!text) return '';
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+  };
+
+  const getStatusColor = (status: string) => {
+    const statusLower = status?.toLowerCase();
+    switch (statusLower) {
+      case 'active':
+        return 'bg-green-100 text-green-800 border-green-300';
+      case 'completed':
+        return 'bg-blue-100 text-blue-800 border-blue-300';
+      case 'on hold':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+      case 'draft':
+        return 'bg-gray-100 text-gray-800 border-gray-300';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-300';
+    }
+  };
+
+  const navigateToProject = (projectId: number) => {
+    router.push(`/projects/${projectId}`);
+  };
+
   return (
     <Layout title="Rotary Projects">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-rotary-blue mb-6">Rotary Projects</h1>
         
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
@@ -94,22 +123,65 @@ const ProjectsPage: React.FC = () => {
           )}
           
           {!loading && !error && projects.map((project) => (
-            <div key={project.id} className="card">
-              <div className="bg-gray-200 border-2 border-dashed rounded-xl w-full h-48 mb-4" />
-              <h3 className="text-lg font-bold text-rotary-blue mb-2">{project.title}</h3>
-              <p className="text-gray-600 text-sm mb-3">
-                {project.description}
-              </p>
-              <div className="flex justify-between items-center">
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                  {project.status}
-                </span>
-                <span className="text-gray-500 text-sm">{project.club_name}</span>
+            <div
+              key={project.id}
+              onClick={() => navigateToProject(project.id)}
+              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer group"
+            >
+              {/* Image Container */}
+              <div className="relative w-full h-48 bg-gradient-to-br from-rotary-blue/10 to-rotary-gold/10 overflow-hidden">
+                {project.main_image ? (
+                  <img
+                    src={project.main_image}
+                    alt={project.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <div className="text-center">
+                      <svg className="w-16 h-16 mx-auto text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <p className="text-gray-400 text-sm">No image</p>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="mt-4">
-                <a href={`/projects/${project.id}`} className="text-rotary-blue hover:text-rotary-gold font-medium">
-                  View details
-                </a>
+
+              {/* Content */}
+              <div className="p-4">
+                {/* Title */}
+                <h3 className="text-lg font-bold text-rotary-blue mb-2 line-clamp-2 group-hover:text-rotary-gold transition-colors">
+                  {project.title}
+                </h3>
+
+                {/* Description */}
+                <p className="text-gray-600 text-sm mb-3 line-clamp-2 h-10">
+                  {truncateText(project.description, 100)}
+                </p>
+
+                {/* Status and Location */}
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(project.status)}`}>
+                    {project.status}
+                  </span>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                    {project.location}
+                  </span>
+                </div>
+
+                {/* Club Name */}
+                <div className="flex justify-between items-center pt-3 border-t border-gray-200">
+                  <span className="text-gray-600 text-sm font-medium">
+                    {project.club_name}
+                  </span>
+                  <span className="text-rotary-blue hover:text-rotary-gold font-medium text-sm transition-colors group-hover:translate-x-1 transition-transform">
+                    →
+                  </span>
+                </div>
               </div>
             </div>
           ))}
@@ -117,16 +189,16 @@ const ProjectsPage: React.FC = () => {
 
         <div className="mt-8 flex justify-center">
           <nav className="inline-flex rounded-md shadow">
-            <a href="#" className="btn-primary px-4 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+            <a href="#" className="px-4 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
               Previous
             </a>
-            <a href="#" className="btn-primary px-4 py-2 border-t border-b border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+            <a href="#" className="px-4 py-2 border-t border-b border-gray-300 bg-rotary-blue text-sm font-medium text-white">
               1
             </a>
-            <a href="#" className="btn-primary px-4 py-2 border-t border-b border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+            <a href="#" className="px-4 py-2 border-t border-b border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
               2
             </a>
-            <a href="#" className="btn-primary px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+            <a href="#" className="px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
               Next
             </a>
           </nav>

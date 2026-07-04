@@ -33,6 +33,7 @@ const NewProjectPage: React.FC = () => {
   });
 
   const [images, setImages] = useState<ProjectImage[]>([]);
+  const [selectedMainImageId, setSelectedMainImageId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isLoadingGoFundMe, setIsLoadingGoFundMe] = useState(false);
   const [isLoadingCrowdfunder, setIsLoadingCrowdfunder] = useState(false);
@@ -271,7 +272,8 @@ const NewProjectPage: React.FC = () => {
         credentials: 'include', // Send session cookies with the request
         body: JSON.stringify({
           ...formData,
-          images: images
+          images: images,
+          mainImageId: selectedMainImageId
         })
       });
 
@@ -307,6 +309,7 @@ const NewProjectPage: React.FC = () => {
         contactPerson: '',
       });
       setImages([]);
+      setSelectedMainImageId(null);
       setFundraisingProgress(null);
 
       // Redirect to projects page after 2 seconds
@@ -642,11 +645,14 @@ const NewProjectPage: React.FC = () => {
             {/* Image Preview */}
             {images.length > 0 && (
               <div className="mt-6">
-                <h3 className="font-semibold text-gray-900 mb-4">Photos ({images.length})</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">Photos ({images.length})</h3>
+                <p className="text-sm text-gray-600 mb-4">Click "Set as Cover" to choose the main photo for your project card</p>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {images.map((image) => (
-                    <div key={image.id} className="relative group">
-                      <div className="relative w-full h-40 bg-gray-200 rounded-lg overflow-hidden border border-gray-300">
+                    <div key={image.id} className={`relative group rounded-lg overflow-hidden border-2 transition-all ${
+                      selectedMainImageId === image.id ? 'border-rotary-gold shadow-lg' : 'border-gray-300'
+                    }`}>
+                      <div className="relative w-full h-40 bg-gray-200 rounded-sm overflow-hidden">
                         {image.isExternal ? (
                           // Para URLs externas, usar img tag simples
                           <img
@@ -668,7 +674,11 @@ const NewProjectPage: React.FC = () => {
                           />
                         )}
                       </div>
-                      <p className="text-xs text-gray-600 mt-2 truncate">{image.name}</p>
+                      {selectedMainImageId === image.id && (
+                        <div className="absolute inset-0 bg-rotary-gold/20 flex items-center justify-center">
+                          <span className="text-rotary-gold font-bold text-sm bg-white px-2 py-1 rounded">COVER</span>
+                        </div>
+                      )}
                       <button
                         type="button"
                         onClick={() => removeImage(image.id)}
@@ -677,6 +687,20 @@ const NewProjectPage: React.FC = () => {
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
+                      </button>
+                    </div>
+                    <div className="mt-2 space-y-2">
+                      <p className="text-xs text-gray-600 truncate">{image.name}</p>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedMainImageId(image.id)}
+                        className={`w-full text-xs font-medium py-1 px-2 rounded transition-colors ${
+                          selectedMainImageId === image.id
+                            ? 'bg-rotary-gold text-white'
+                            : 'bg-gray-200 text-gray-700 hover:bg-rotary-gold/20'
+                        }`}
+                      >
+                        {selectedMainImageId === image.id ? '✓ Cover Photo' : 'Set as Cover'}
                       </button>
                     </div>
                   ))}
