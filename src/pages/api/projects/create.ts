@@ -64,29 +64,58 @@ export default async function handler(
 
     // Insert project
     try {
-      await db.execute({
+      const insertResult = await db.execute({
         sql: `INSERT INTO projects (title, club_name, category, location, description, status, start_date, end_date, fundraising_link, external_links, contact_person, created_by) 
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         args: [title, clubName, category, location, description, status, startDate || null, endDate || null, fundraisingLink || null, externalLinks || null, contactPerson || null, userId]
       });
 
-      console.log('Project inserted successfully');
+      console.log('Project inserted successfully, result:', insertResult);
     } catch (insertError) {
       console.error('Insert failed:', insertError);
       throw insertError;
     }
 
-    // Get the project ID using max - get the most recent project for this user
-    const idResult = await db.execute({
-      sql: 'SELECT MAX(id) as last_id FROM projects WHERE created_by = ?',
-      args: [userId]
-    });
+    // Get the project ID - try multiple ways
+    let projectId: any = null;
+    
+    try {
+      // Try method 1: direct SELECT
+      const allProjectsResult = await db.execute({
+        sql: 'SELECT id FROM projects WHERE created_by = ? ORDER BY id DESC LIMIT 1',
+        args: [userId]
+      });
+      
+      if (allProjectsResult.rows && allProjectsResult.rows.length > 0) {
+        projectId = (allProjectsResult.rows[0] as any).id;
+        console.log('Got project ID via direct SELECT:', projectId);
+      }
+    } catch (e) {
+      console.error('Method 1 failed:', e);
+    }
 
-    const projectId = (idResult.rows[0] as any)?.last_id || (idResult.rows[0] as any)?.id;
+    if (!projectId) {
+      // Try method 2: MAX
+      try {
+        const maxResult = await db.execute({
+          sql: 'SELECT MAX(id) as last_id FROM projects WHERE created_by = ?',
+          args: [userId]
+        });
+        
+        if (maxResult.rows && maxResult.rows.length > 0) {
+          projectId = (maxResult.rows[0] as any).last_id;
+          console.log('Got project ID via MAX:', projectId);
+        }
+      } catch (e) {
+        console.error('Method 2 failed:', e);
+      }
+    }
 
     if (!projectId) {
       throw new Error('Could not retrieve project ID after insertion');
     }
+
+    console.log('Project created with ID:', projectId);
 
     console.log('Project created with ID:', projectId);
 
