@@ -15,25 +15,7 @@ const NewProjectPage: React.FC = () => {
   const router = useRouter();
   const { data: session, status } = useSession();
 
-  // Redirect to login if not authenticated
-  if (status === 'loading') {
-    return (
-      <Layout title="Create New Project">
-        <div className="flex justify-center items-center h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rotary-blue mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading...</p>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
-  if (status === 'unauthenticated') {
-    router.push('/login');
-    return null;
-  }
-
+  // Declare all state hooks FIRST, before any conditional returns
   const [formData, setFormData] = useState({
     title: '',
     clubName: '',
@@ -54,6 +36,25 @@ const NewProjectPage: React.FC = () => {
   const [isLoadingGoFundMe, setIsLoadingGoFundMe] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // NOW check authentication status
+  if (status === 'loading') {
+    return (
+      <Layout title="Create New Project">
+        <div className="flex justify-center items-center h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rotary-blue mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (status === 'unauthenticated') {
+    router.push('/login');
+    return null;
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
