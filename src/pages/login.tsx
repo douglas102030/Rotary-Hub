@@ -28,7 +28,7 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <Layout title="Portal Sign In">
+    <Layout title="Portal Sign In - Rotary Ireland Hub">
       {/* Hero Background */}
       <div className="relative bg-gradient-to-b from-gray-50 to-white min-h-[90vh] flex flex-col items-center justify-center py-12 lg:py-24 overflow-hidden">
         {/* Subtle Accent Elements */}
@@ -42,9 +42,9 @@ const LoginPage: React.FC = () => {
           <Link href="/" className="inline-flex items-center justify-center group focus:outline-none focus:ring-4 focus:ring-rotary-gold rounded-full p-4 hover:bg-rotary-blue/5 transition-all duration-300">
             <Image 
               src="/rotary-logo-official.jpeg" 
-              alt="Rotary logo" 
-              width={280} 
-              height={140} 
+              alt="Rotary Ireland Hub" 
+              width={320} 
+              height={160} 
               className="drop-shadow-lg transform group-hover:scale-105 transition-transform duration-500"
               priority
             />
@@ -58,7 +58,7 @@ const LoginPage: React.FC = () => {
             <div className="bg-white rounded-2xl shadow-xl p-8 border border-rotary-gold/20">
               <div className="mb-8">
                 <h2 className="text-3xl font-bold text-rotary-blue text-center">Sign In</h2>
-                <p className="text-center text-gray-600 text-sm mt-2">Access your Rotary Club account</p>
+                <p className="text-center text-gray-600 text-sm mt-2">Access your Rotary Ireland Hub account</p>
               </div>
               <LoginForm onSubmit={handleSubmit} errorMessage={errorMessage} />
 
