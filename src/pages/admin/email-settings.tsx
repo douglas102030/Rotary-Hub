@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSession } from 'next-auth/react';
-import Layout from '../../../components/Layout';
+import Layout from '../../components/Layout';
 
 interface EmailConfig {
   id?: number;
