@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getDatabase } from '../../../lib/database';
+import { getDatebaseClient } from '../../../lib/database';
 
 interface Campaign {
   id: string;
@@ -28,7 +28,7 @@ export default async function handler(
   }
 
   try {
-    const db = getDatabase();
+    const db = getDatebaseClient();
     
     // Criar tabela se não existir
     db.exec(`

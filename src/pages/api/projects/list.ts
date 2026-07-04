@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getDatabase } from '../../../lib/database';
+import { getDatebaseClient } from '../../../lib/database';
 
 export default async function handler(
   req: NextApiRequest,
@@ -10,7 +10,7 @@ export default async function handler(
   }
 
   try {
-    const db = await getDatabase();
+    const db = getDatebaseClient();
 
     // Get all projects
     const result = await db.execute({

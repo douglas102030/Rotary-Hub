@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getDatabase } from '../../../../lib/database';
+import { getDatebaseClient } from '../../../../lib/database';
 
 interface CampaignData {
   id: string;
@@ -23,7 +23,7 @@ export default async function handler(
   }
 
   try {
-    const db = getDatabase();
+    const db = getDatebaseClient();
     
     const stmt = db.prepare(`
       SELECT id, title, description, goal, raised, image, createdAt

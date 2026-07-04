@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getDatabase } from '../../../lib/database';
+import { getDatebaseClient } from '../../../lib/database';
 
 export default async function handler(
   req: NextApiRequest,
@@ -16,7 +16,7 @@ export default async function handler(
       return res.status(400).json({ message: 'Project ID is required' });
     }
 
-    const db = await getDatabase();
+    const db = getDatebaseClient();
 
     // Get project
     const projectResult = await db.execute({
