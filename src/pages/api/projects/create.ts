@@ -76,13 +76,13 @@ export default async function handler(
       throw insertError;
     }
 
-    // Get the project ID using max
+    // Get the project ID using max - get the most recent project for this user
     const idResult = await db.execute({
-      sql: 'SELECT MAX(id) as id FROM projects WHERE created_by = ? ORDER BY id DESC LIMIT 1'  ,
+      sql: 'SELECT MAX(id) as last_id FROM projects WHERE created_by = ?',
       args: [userId]
     });
 
-    const projectId = (idResult.rows[0] as any)?.id;
+    const projectId = (idResult.rows[0] as any)?.last_id || (idResult.rows[0] as any)?.id;
 
     if (!projectId) {
       throw new Error('Could not retrieve project ID after insertion');
