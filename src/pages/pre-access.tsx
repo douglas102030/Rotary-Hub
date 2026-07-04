@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
 import Layout from '../components/Layout';
 
 type FormData = {
@@ -140,123 +138,111 @@ const PreAccessPage: React.FC = () => {
   return (
     <Layout title="Request Access - Rotary Club HUB Projects">
       
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-rotary-blue to-rotary-dark-blue text-white py-16 lg:py-24 overflow-hidden" aria-labelledby="hero-title">
+      {/* Hero Section - Minimalist */}
+      <section className="relative bg-gradient-to-br from-rotary-blue to-rotary-dark-blue text-white py-6 lg:py-8 overflow-hidden" aria-labelledby="hero-title">
         <div
           className="absolute inset-0 opacity-[3%] bg-radial-dots-white-60"
           aria-hidden="true"
         />
 
-        {/* Logo */}
-        <div className="container mx-auto px-4 relative z-[5] text-center mb-8">
-          <Link href="/" 
-            className="inline-flex items-center space-x-3 group transition-all duration-300 hover:bg-white/10 rounded-lg p-2" 
-            aria-label="Go to home page"
-          >
-            <div
-              className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full shadow-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500 border-2 border-white/30 overflow-hidden cursor-pointer"
-            >
-              <Image src="/rotary-logo.png" alt="Rotary logo" width={64} height={64} className="h-full w-full object-contain" priority />
-            </div>
-          </Link>
-
-          <h1 id="hero-title" className="text-4xl lg:text-[3rem] font-bold mb-4 leading-tight mt-2 animate-fade-in-down">Join Our Community</h1>
+        <div className="container mx-auto px-4 relative z-[5] text-center">
+          <h1 id="hero-title" className="text-2xl lg:text-3xl font-bold mb-2 leading-tight animate-fade-in-down">Request Access</h1>
           <p 
             data-style="description-lg" 
-            className="text-xl md:text-2xl text-gray-100 max-w-3xl mx-auto leading-relaxed pt-5 transition-colors duration-[.75s] ease-in-out animate-fade-in-down delay-[.5s]"
-          >Request free access to Rotary Club HUB Projects and start creating impact.</p>
-
+            className="text-sm md:text-base text-gray-100 max-w-2xl mx-auto leading-relaxed transition-colors duration-[.75s] ease-in-out animate-fade-in-down delay-[.5s]"
+          >Join our community and start creating impact with Rotary Club HUB Projects.</p>
         </div>
 
       </section>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-12 lg:py-[7rem] -mt-8 relative z-[5]" aria-labelledby="hero-title">
+      <main className="container mx-auto px-4 py-8 -mt-6 relative z-[5]" aria-labelledby="hero-title">
         
         <div 
           id="pre-access-section"
           role="region"
-          className="bg-white rounded-xl shadow-lg p-8 lg:p-12 min-h-min border-t-[5px] border-yellow-500 animate-fade-in-up max-w-4xl mx-auto"
+          className="bg-white rounded-2xl shadow-2xl p-8 lg:p-12 min-h-min border-t-4 border-rotary-gold animate-fade-in-up max-w-2xl mx-auto"
         >
 
           {/* Header Section */}
-          <div className="mb-8">
-            <h2 id="form-title-class" role="heading" tabIndex={1}>Pre-Access Request</h2>            
-            <p 
-              data-style="description-lg" 
-              aria-labelledby="hero-title"
-              className="text-gray-600 mb-8 leading-relaxed text-base lg:text-lg tracking-wide pt-3 transition-colors duration-[.75s] px-2 md:pt-4 animate-fade-in-up"
-            >
-              Fill out the form below to request access to the HUB Projects portal. 
-              An administrator will review your request and respond within 48 business hours.
+          <div className="mb-8 text-center">
+            <h2 className="text-2xl font-bold text-rotary-blue mb-3">Pre-Access Request Form</h2>            
+            <p className="text-gray-600 text-sm leading-relaxed">
+              Fill out the form below to request access. Our team will review and respond within 48 business hours.
             </p>
-
           </div>
 
 
           {/* Form Fields */}
           
-          <form className="flex-grow w-full max-w-md mx-auto space-y-6" onSubmit={handleSubmit}> 
+          <form className="w-full space-y-5" onSubmit={handleSubmit}> 
 
             {Object.keys(errors).length > 0 && ( 
-              <strong role="alert" aria-live="assertive">Please correct the errors below.</strong>
+              <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded" role="alert" aria-live="assertive">
+                <p className="text-red-700 font-semibold">Please correct the errors below</p>
+              </div>
             )}
 
-            <InputField id="fullName" name="fullName" label="Full Name" value={formData.fullName} error={errors.fullName} placeholder="Enter your full name" onChange={handleChange} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <InputField id="fullName" name="fullName" label="Full Name" value={formData.fullName} error={errors.fullName} placeholder="Enter your full name" onChange={handleChange} />
 
-            {/* Email */}
-            <InputField 
-              id="email" 
-              name="email" 
-              label="Email" 
-              value={formData.email}
-              error={errors.email}
-              type="email" 
-              placeholder="you@example.com"
-              onChange={handleChange}
-            />
-
-            <InputField id="clubName" name="clubName" label="Rotary Club Name" value={formData.clubName} error={errors.clubName} placeholder="Enter your club name" onChange={handleChange} />
-
-            <InputField 
-              id="position" 
-              name="position" 
-              label="Position or Role in the Club"
-              value={formData.position}
-              error={errors.position}
-              placeholder="Example: President, Member, etc."
-              onChange={handleChange}
-            />
-
-            <div className={`mb-6 ${errors.phoneNumber ? 'bg-red-50 border-l-4 border-red-500' : ''}`}>
-              <label htmlFor="phoneNumber" className="block text-sm font-semibold mb-2">
-                Phone (Optional)
-              </label>
-              <input
-                type="tel"
-                id="phoneNumber"
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setFormData(prev => ({ ...prev, phoneNumber: e.target.value }));
-                  if (errors.phoneNumber) {
-                    setErrors(prev => {
-                      const newErrors = { ...prev };
-                      delete newErrors.phoneNumber;
-                      return newErrors;
-                    });
-                  }
-                }}
-                placeholder="(123) 456-7890"
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none ${errors.phoneNumber ? 'border-red-300' : 'border-gray-300'} focus:ring-blue-500`}
+              <InputField 
+                id="email" 
+                name="email" 
+                label="Email" 
+                value={formData.email}
+                error={errors.email}
+                type="email" 
+                placeholder="you@example.com"
+                onChange={handleChange}
               />
-              {errors.phoneNumber && <p className="mt-1 text-sm text-red-600">{errors.phoneNumber}</p>}
             </div>
 
-            <InputField id="country" name="country" label="Country or Region" value={formData.country} error={errors.country} placeholder="Enter your country or region" onChange={handleChange} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <InputField id="clubName" name="clubName" label="Rotary Club Name" value={formData.clubName} error={errors.clubName} placeholder="Enter your club name" onChange={handleChange} />
 
-            <div className={`mb-8 ${errors.message ? 'bg-red-50 border-l-4 border-red-500' : ''}`}>
-              <label htmlFor="message" className="block text-sm font-semibold mb-2">
+              <InputField 
+                id="position" 
+                name="position" 
+                label="Position in Club"
+                value={formData.position}
+                error={errors.position}
+                placeholder="e.g., President, Member"
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className={`${errors.phoneNumber ? 'bg-red-50 border-l-4 border-red-500 p-3 rounded' : ''}`}>
+                <label htmlFor="phoneNumber" className="block text-sm font-semibold mb-2 text-gray-700">
+                  Phone (Optional)
+                </label>
+                <input
+                  type="tel"
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    setFormData(prev => ({ ...prev, phoneNumber: e.target.value }));
+                    if (errors.phoneNumber) {
+                      setErrors(prev => {
+                        const newErrors = { ...prev };
+                        delete newErrors.phoneNumber;
+                        return newErrors;
+                      });
+                    }
+                  }}
+                  placeholder="(123) 456-7890"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none ${errors.phoneNumber ? 'border-red-300' : 'border-gray-300'} focus:ring-blue-500`}
+                />
+                {errors.phoneNumber && <p className="mt-1 text-sm text-red-600">{errors.phoneNumber}</p>}
+              </div>
+
+              <InputField id="country" name="country" label="Country / Region" value={formData.country} error={errors.country} placeholder="Enter your country" onChange={handleChange} />
+            </div>
+
+            <div className={`${errors.message ? 'bg-red-50 border-l-4 border-red-500 p-3 rounded' : ''}`}>
+              <label htmlFor="message" className="block text-sm font-semibold mb-2 text-gray-700">
                 Request Reason {!formData.message.trim() && !errors.message && <span className="text-red-500 ml-1">*</span>}
               </label>
               <textarea
@@ -273,9 +259,9 @@ const PreAccessPage: React.FC = () => {
                     });
                   }
                 }}
-                rows={5}
-                placeholder="Explain why you need access to the HUB Projects portal..."
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none ${errors.message ? 'border-red-300' : 'border-gray-300'} focus:ring-blue-500`}
+                rows={4}
+                placeholder="Why do you need access to the HUB Projects portal?"
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none ${errors.message ? 'border-red-300' : 'border-gray-300'} focus:ring-blue-500 resize-none`}
               />
               {errors.message && <p className="mt-1 text-sm text-red-600">{errors.message}</p>}
             </div>
@@ -283,19 +269,19 @@ const PreAccessPage: React.FC = () => {
             {/* Button Submit */}
             <button 
               type="submit" 
-              disabled={isSubmitting || Object.keys(errors).length > 0}
-              className={`w-full py-4 px-6 rounded-lg font-bold text-white shadow-md transition-all duration-[.9s] ease-in-out ${
+              disabled={isSubmitting}
+              className={`w-full py-3 px-6 rounded-lg font-bold text-white shadow-md transition-all duration-300 ease-in-out ${
                 isSubmitting ? 'bg-gray-400 cursor-not-allowed opacity-75' : 
-                Object.keys(errors).length > 0 ? 'bg-red-500 cursor-not-allowed opacity-75' : 
-                'bg-gradient-to-r from-yellow-500 via-orange-500 to-pink-600 hover:from-yellow-400 hover:via-purple-600 shadow-lg hover:-translate-y-1'
+                'bg-rotary-gold hover:bg-yellow-600 text-rotary-blue shadow-lg hover:-translate-y-1'
               }`}
             >
               {isSubmitting ? (
                 <span className="flex items-center justify-center gap-x-2">
-                  Sending your request...
-                  <svg className={`inline w-5 h-5 text-white animate-spin`}>
-                    <circle cx="12" cy="12" r="9" fill="none" strokeWidth={3} />
+                  <svg className="inline w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" opacity="0.25" />
+                    <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
+                  Sending...
                 </span>
               ) : 'Submit Request'}
             </button>

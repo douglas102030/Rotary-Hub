@@ -56,6 +56,9 @@ const Layout: React.FC<LayoutProps> = ({ children, title = 'Rotary Ireland Hub' 
                 <li><Link href="/projects" className="hover:text-rotary-gold transition">Projects</Link></li>
                 <li><Link href="/campaigns" className="hover:text-rotary-gold transition">Campaigns</Link></li>
                 <li><Link href="/dashboard" className="hover:text-rotary-gold transition">Dashboard</Link></li>
+                {session?.user?.role === 'admin' && (
+                  <li><Link href="/admin" className="hover:text-rotary-gold transition font-bold">Admin</Link></li>
+                )}
               </ul>
             </nav>
           )}

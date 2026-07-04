@@ -103,7 +103,7 @@ const AdminPage: React.FC = () => {
                 </table>
               </div>
               <div className="mt-4 text-center">
-                <Link href="/admin/users" className="text-rotary-blue hover:text-rotary-gold font-medium">
+                <Link href="/admin/pre-access-requests" className="text-rotary-blue hover:text-rotary-gold font-medium">
                   View all requests
                 </Link>
               </div>
@@ -129,6 +129,9 @@ const AdminPage: React.FC = () => {
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-xl font-bold text-rotary-blue mb-4">Quick Actions</h2>
               <div className="space-y-3">
+                <Link href="/admin/pre-access-requests" className="block w-full btn-primary text-center">
+                  Manage Access Requests
+                </Link>
                 <Link href="/admin/users" className="block w-full btn-primary text-center">
                   Manage Users
                 </Link>
