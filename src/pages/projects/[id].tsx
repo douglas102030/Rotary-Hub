@@ -1,51 +1,120 @@
-import React, { useState } from 'react';
-import Image from 'next/image';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
-import FundraisingWidget from '../../components/FundraisingWidget';
+import FundraisingProgressTracker from '../../components/FundraisingProgressTracker';
 
-interface ProjectPhoto {
+interface Project {
   id: number;
-  src: string;
-  alt: string;
+  title: string;
+  club_name: string;
+  category: string;
+  location: string;
+  description: string;
+  status: string;
+  start_date?: string;
+  end_date?: string;
+  fundraising_link?: string;
+  gofundme_url?: string;
+  crowdfunder_url?: string;
+  raised?: number;
+  goal?: number;
+  main_image?: string;
+  photos?: Array<{ id: number; image_url: string }>;
 }
 
 const ProjectDetailPage: React.FC = () => {
-  const [selectedPhoto, setSelectedPhoto] = useState<ProjectPhoto | null>(null);
-  
-  const photos: ProjectPhoto[] = [
-    { id: 1, src: '/placeholder-project-1.jpg', alt: 'Project photo 1' },
-    { id: 2, src: '/placeholder-project-2.jpg', alt: 'Project photo 2' },
-    { id: 3, src: '/placeholder-project-3.jpg', alt: 'Project photo 3' },
-    { id: 4, src: '/placeholder-project-4.jpg', alt: 'Project photo 4' },
-    { id: 5, src: '/placeholder-project-5.jpg', alt: 'Project photo 5' },
-    { id: 6, src: '/placeholder-project-6.jpg', alt: 'Project photo 6' },
-  ];
+  const router = useRouter();
+  const { id } = router.query;
+  const [project, setProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
 
-  const currentPhotoIndex = selectedPhoto ? photos.findIndex(p => p.id === selectedPhoto.id) : -1;
+  useEffect(() => {
+    if (!id) return;
 
-  const goToPreviousPhoto = () => {
-    if (currentPhotoIndex > 0) {
-      setSelectedPhoto(photos[currentPhotoIndex - 1]);
+    const fetchProject = async () => {
+      try {
+        const response = await fetch(`/api/projects/${id}`);
+        const data = await response.json();
+
+        if (data.success) {
+          setProject(data.project);
+        } else {
+          setError(data.message || 'Failed to load project');
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load project');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProject();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <Layout title="Project Details">
+        <div className="flex justify-center items-center h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rotary-blue mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading project...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error || !project) {
+    return (
+      <Layout title="Project Details">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <h2 className="text-lg font-bold text-red-800 mb-2">Error Loading Project</h2>
+            <p className="text-red-700">{error || 'Project not found'}</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  const photos = project.photos || [];
+  const hasFundraisingTracking = project.gofundme_url || project.crowdfunder_url;
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'active':
+        return 'bg-green-100 text-green-800';
+      case 'completed':
+        return 'bg-blue-100 text-blue-800';
+      case 'draft':
+        return 'bg-gray-100 text-gray-800';
+      case 'on hold':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const goToNextPhoto = () => {
-    if (currentPhotoIndex < photos.length - 1) {
-      setSelectedPhoto(photos[currentPhotoIndex + 1]);
-    }
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
   return (
-    <Layout title="Project Details">
+    <Layout title={`${project.title} - Project Details`}>
       <div className="max-w-7xl mx-auto pb-8">
         {/* Header */}
         <div className="flex justify-between items-start mb-6 flex-col md:flex-row gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-rotary-blue">Sample Project</h1>
-            <p className="text-gray-600 mt-2">Sample Club - Sample Location</p>
+            <h1 className="text-3xl font-bold text-rotary-blue">{project.title}</h1>
+            <p className="text-gray-600 mt-2">
+              {project.club_name} • {project.location}
+            </p>
           </div>
-          <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-green-100 text-green-800">
-            Active
+          <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold ${getStatusColor(project.status)}`}>
+            {project.status}
           </span>
         </div>
 
@@ -55,61 +124,85 @@ const ProjectDetailPage: React.FC = () => {
             {/* Description */}
             <div className="bg-white rounded-lg shadow-md p-6 mb-6">
               <h2 className="text-2xl font-bold text-rotary-blue mb-4">About this project</h2>
-              
-              <div className="prose max-w-none text-gray-700">
-                <p className="mb-4">
-                  Detailed description of the sample project. This project aims to make a significant impact on the community by providing essential resources and support to those in need.
-                </p>
-                
-                <h3 className="text-xl font-bold text-rotary-blue mt-6 mb-3">Goals</h3>
-                <ul className="list-disc pl-5 space-y-2 mb-4">
-                  <li>Improve access to education for underprivileged children</li>
-                  <li>Provide vocational training and job skills</li>
-                  <li>Support sustainable community development</li>
-                </ul>
-                
-                <h3 className="text-xl font-bold text-rotary-blue mt-6 mb-3">Expected Results</h3>
-                <p>
-                  The expected results for this project include reaching at least 500 families, creating 100 new jobs, and establishing sustainable income sources for participating communities.
-                </p>
-              </div>
+              <p className="text-gray-700 whitespace-pre-wrap">{project.description}</p>
             </div>
 
-            {/* Fundraising Widget */}
-            <FundraisingWidget goFundMeUrl="https://www.gofundme.com/f/sample-project-campaign" />
+            {/* Fundraising Progress Tracker */}
+            {hasFundraisingTracking && (
+              <div className="mb-6">
+                {project.gofundme_url && (
+                  <FundraisingProgressTracker
+                    projectId={project.id}
+                    url={project.gofundme_url}
+                    platform="gofundme"
+                    initialRaised={project.raised || 0}
+                    initialGoal={project.goal || 0}
+                  />
+                )}
+                {project.crowdfunder_url && (
+                  <FundraisingProgressTracker
+                    projectId={project.id}
+                    url={project.crowdfunder_url}
+                    platform="crowdfunder"
+                    initialRaised={project.raised || 0}
+                    initialGoal={project.goal || 0}
+                  />
+                )}
+              </div>
+            )}
 
             {/* Photo Gallery */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-bold text-rotary-blue mb-6">Photo Gallery ({photos.length})</h2>
-              
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {photos.map((photo) => (
-                  <div
-                    key={photo.id}
-                    onClick={() => setSelectedPhoto(photo)}
-                    className="relative group cursor-pointer overflow-hidden rounded-lg bg-gray-200 aspect-square"
-                  >
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
-                      <svg className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-all duration-300" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </div>
-                    <div className="absolute top-2 right-2 bg-white/80 px-2 py-1 rounded text-xs font-medium text-gray-800 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                      {photo.id}/{photos.length}
-                    </div>
-                  </div>
-                ))}
-              </div>
+            {photos.length > 0 && (
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-2xl font-bold text-rotary-blue mb-6">Photo Gallery ({photos.length})</h2>
 
-              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-gray-700">
-                <p className="flex items-center">
-                  <svg className="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                  </svg>
-                  Click on any photo to view in full screen
-                </p>
+                {/* Main image display */}
+                <div className="mb-6">
+                  <div className="relative bg-gray-200 rounded-lg overflow-hidden" style={{ aspectRatio: '16 / 9' }}>
+                    <img
+                      src={photos[selectedPhotoIndex]?.image_url}
+                      alt={`Project photo ${selectedPhotoIndex + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    {photos.length > 1 && (
+                      <>
+                        <button
+                          onClick={() => setSelectedPhotoIndex((i) => (i - 1 + photos.length) % photos.length)}
+                          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 transition"
+                        >
+                          ←
+                        </button>
+                        <button
+                          onClick={() => setSelectedPhotoIndex((i) => (i + 1) % photos.length)}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 transition"
+                        >
+                          →
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Thumbnail gallery */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {photos.map((photo, index) => (
+                    <button
+                      key={photo.id}
+                      onClick={() => setSelectedPhotoIndex(index)}
+                      className={`relative rounded-lg overflow-hidden aspect-square transition ${
+                        selectedPhotoIndex === index ? 'ring-2 ring-rotary-gold' : 'opacity-70 hover:opacity-100'
+                      }`}
+                    >
+                      <img
+                        src={photo.image_url}
+                        alt={`Thumbnail ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Sidebar */}
@@ -117,150 +210,70 @@ const ProjectDetailPage: React.FC = () => {
             {/* Project Details */}
             <div className="bg-white rounded-lg shadow-md p-6 mb-6 sticky top-4">
               <h2 className="text-xl font-bold text-rotary-blue mb-4">Project Details</h2>
-              
+
               <div className="space-y-4">
                 <div>
                   <p className="text-xs font-semibold text-gray-500 uppercase">Category</p>
-                  <p className="mt-1 text-gray-900 font-medium">Education</p>
+                  <p className="mt-1 text-gray-900 font-medium">{project.category}</p>
                 </div>
-                
+
                 <div>
                   <p className="text-xs font-semibold text-gray-500 uppercase">Location</p>
-                  <p className="mt-1 text-gray-900 font-medium">Sample City, Sample Country</p>
+                  <p className="mt-1 text-gray-900 font-medium">{project.location}</p>
                 </div>
-                
+
                 <div>
                   <p className="text-xs font-semibold text-gray-500 uppercase">Status</p>
                   <p className="mt-1">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
-                      Active
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(project.status)}`}>
+                      {project.status}
                     </span>
                   </p>
                 </div>
-                
-                <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase">Start Date</p>
-                  <p className="mt-1 text-gray-900 font-medium">01/01/2026</p>
-                </div>
-                
-                <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase">End Date</p>
-                  <p className="mt-1 text-gray-900 font-medium">31/12/2026</p>
-                </div>
-                
-                <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase">Responsible Club</p>
-                  <p className="mt-1 text-gray-900 font-medium">Sample Club</p>
-                </div>
-                
-                <div>
-                  <p className="text-xs font-semibold text-gray-500 uppercase">Contact Person</p>
-                  <p className="mt-1 text-gray-900 font-medium">John Doe</p>
-                </div>
-              </div>
-            </div>
 
-            {/* Useful Links */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-bold text-rotary-blue mb-4">Useful Links</h2>
-              
-              <div className="space-y-3">
-                <a 
-                  href="#" 
-                  className="flex items-center text-rotary-blue hover:text-rotary-gold font-medium transition-colors"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                  </svg>
-                  Fundraising Campaign
-                </a>
-                
-                <a 
-                  href="#" 
-                  className="flex items-center text-rotary-blue hover:text-rotary-gold font-medium transition-colors"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                  External Website
-                </a>
+                {project.start_date && (
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase">Start Date</p>
+                    <p className="mt-1 text-gray-900 font-medium">{formatDate(project.start_date)}</p>
+                  </div>
+                )}
+
+                {project.end_date && (
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase">End Date</p>
+                    <p className="mt-1 text-gray-900 font-medium">{formatDate(project.end_date)}</p>
+                  </div>
+                )}
+
+                {project.fundraising_link && (
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase">Fundraising Link</p>
+                    <a
+                      href={project.fundraising_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1 text-rotary-blue hover:text-rotary-gold font-medium break-all"
+                    >
+                      View Campaign →
+                    </a>
+                  </div>
+                )}
+
+                {project.goal && project.goal > 0 && (
+                  <div className="pt-4 border-t">
+                    <p className="text-xs font-semibold text-gray-500 uppercase">Fundraising Goal</p>
+                    <p className="mt-1 text-2xl font-bold text-rotary-gold">£{project.goal.toLocaleString()}</p>
+                    {project.raised && (
+                      <p className="text-sm text-gray-600 mt-1">
+                        Raised: £{project.raised.toLocaleString()}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
-
-        {/* Photo Lightbox Modal */}
-        {selectedPhoto && (
-          <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={() => setSelectedPhoto(null)}>
-            <div className="relative max-w-5xl w-full" onClick={(e) => e.stopPropagation()}>
-              {/* Close Button */}
-              <button
-                onClick={() => setSelectedPhoto(null)}
-                className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition-all duration-300 z-10"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-
-              {/* Main Image */}
-              <div className="relative w-full bg-gray-900 rounded-lg overflow-hidden aspect-video">
-                <Image
-                  src={selectedPhoto.src}
-                  alt={selectedPhoto.alt}
-                  fill
-                  className="object-contain"
-                />
-              </div>
-
-              {/* Navigation */}
-              <div className="flex items-center justify-between mt-4">
-                <button
-                  onClick={goToPreviousPhoto}
-                  disabled={currentPhotoIndex === 0}
-                  className="flex items-center gap-2 bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-all duration-300 font-medium"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                  Previous
-                </button>
-
-                <div className="text-white font-medium bg-white/10 px-4 py-2 rounded-lg">
-                  {currentPhotoIndex + 1} / {photos.length}
-                </div>
-
-                <button
-                  onClick={goToNextPhoto}
-                  disabled={currentPhotoIndex === photos.length - 1}
-                  className="flex items-center gap-2 bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-all duration-300 font-medium"
-                >
-                  Next
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Thumbnails */}
-              <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
-                {photos.map((photo) => (
-                  <button
-                    key={photo.id}
-                    onClick={() => setSelectedPhoto(photo)}
-                    className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all duration-300 ${
-                      selectedPhoto.id === photo.id
-                        ? 'border-white'
-                        : 'border-white/30 hover:border-white/60'
-                    }`}
-                  >
-                    <div className="relative w-full h-full bg-gray-700" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </Layout>
   );
