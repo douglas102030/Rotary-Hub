@@ -44,7 +44,7 @@ const LoginPage: React.FC = () => {
 
         {/* Login Card */}
         <div className="container mx-auto px-4 relative z-20 flex items-center justify-center">
-          <div className="w-full max-w-md animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+          <div className="w-full max-w-md animate-fade-in-up [animation-delay:300ms]">
             <LoginForm onSubmit={handleSubmit} errorMessage={errorMessage} />
 
             <Link href="/" className="block w-full text-right mt-6 hover:text-yellow-500 transition-colors">

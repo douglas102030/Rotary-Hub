@@ -91,7 +91,7 @@ const UsersPage: React.FC = () => {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Club</label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rotary-blue">
+                <select aria-label="Filter users by club" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rotary-blue">
                   <option>All clubs</option>
                   <option>Sample Club 1</option>
                   <option>Sample Club 2</option>
@@ -100,7 +100,7 @@ const UsersPage: React.FC = () => {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rotary-blue">
+                <select aria-label="Filter users by status" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rotary-blue">
                   <option>All statuses</option>
                   <option>Active</option>
                   <option>Inactive</option>
@@ -109,7 +109,7 @@ const UsersPage: React.FC = () => {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Role/Position</label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rotary-blue">
+                <select aria-label="Filter users by role" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rotary-blue">
                   <option>All roles</option>
                   <option>Member</option>
                   <option>Club Manager</option>
@@ -128,7 +128,7 @@ const UsersPage: React.FC = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Action for selected users</label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rotary-blue">
+                <select aria-label="Bulk action for selected users" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rotary-blue">
                   <option>Select an action</option>
                   <option>Activate users</option>
                   <option>Deactivate users</option>

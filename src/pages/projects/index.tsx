@@ -15,20 +15,20 @@ const ProjectsPage: React.FC = () => {
             </div>
             
             <div className="flex space-x-3">
-              <select className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-rotary-blue">
+              <select aria-label="Filter projects by club" className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-rotary-blue">
                 <option>All clubs</option>
                 <option>Sample Club 1</option>
                 <option>Sample Club 2</option>
               </select>
               
-              <select className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-rotary-blue">
+              <select aria-label="Filter projects by category" className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-rotary-blue">
                 <option>All categories</option>
                 <option>Education</option>
                 <option>Health</option>
                 <option>Environment</option>
               </select>
               
-              <select className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-rotary-blue">
+              <select aria-label="Filter projects by status" className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-rotary-blue">
                 <option>All statuses</option>
                 <option>Draft</option>
                 <option>Active</option>

@@ -142,9 +142,8 @@ const PreAccessPage: React.FC = () => {
       
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-rotary-blue to-rotary-dark-blue text-white py-16 lg:py-24 overflow-hidden" aria-labelledby="hero-title">
-        <div 
-          className="absolute inset-0 opacity-[3%]"
-          style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '60px 60px' }}
+        <div
+          className="absolute inset-0 opacity-[3%] bg-radial-dots-white-60"
           aria-hidden="true"
         />
 
@@ -154,7 +153,7 @@ const PreAccessPage: React.FC = () => {
             className="inline-flex items-center space-x-3 group transition-all duration-300 hover:bg-white/10 rounded-lg p-2" 
             aria-label="Go to home page"
           >
-            <div role="img" 
+            <div
               className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full shadow-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500 border-2 border-white/30 overflow-hidden cursor-pointer"
             >
               <Image src="/rotary-logo.png" alt="Rotary logo" width={64} height={64} className="h-full w-full object-contain" priority />

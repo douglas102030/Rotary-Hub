@@ -10,13 +10,7 @@ const HomePage: React.FC = () => {
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-rotary-blue to-rotary-dark-blue text-white py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
-          <div 
-            className="w-full h-full"
-            style={{
-              backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-              backgroundSize: '48px 48px'
-            }}
-          />
+          <div className="w-full h-full bg-radial-dots-white-48" />
         </div>
         
         <div className="container mx-auto px-4 relative z-10">
@@ -152,13 +146,7 @@ const HomePage: React.FC = () => {
       {/* CTA Section */}
       <section className="py-24 bg-gradient-to-br from-gray-900 via-blue-950 to-gray-900 text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
-          <div 
-            className="w-full h-full"
-            style={{
-              backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-              backgroundSize: '64px 64px'
-            }}
-          />
+          <div className="w-full h-full bg-radial-dots-white-64" />
         </div>
 
         <div className="container mx-auto px-4 relative z-10">

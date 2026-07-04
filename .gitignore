@@ -1,1 +1,4 @@
 node_modules
+.next
+local.db
+tsconfig.tsbuildinfo
