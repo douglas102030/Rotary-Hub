@@ -62,39 +62,30 @@ export default async function handler(
 
     const userId = (userResult.rows[0] as any).id;
 
-    // Insert project and get the ID back using RETURNING (libSQL supports this)
-    let projectId: any;
-    
+    // Insert project
     try {
-      // Try with RETURNING first
-      const projectResult = await db.execute({
-        sql: `INSERT INTO projects (title, club_name, category, location, description, status, start_date, end_date, fundraising_link, external_links, contact_person, created_by) 
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-              RETURNING id`,
-        args: [title, clubName, category, location, description, status, startDate || null, endDate || null, fundraisingLink || null, externalLinks || null, contactPerson || null, userId]
-      });
-
-      if (projectResult.rows && projectResult.rows.length > 0) {
-        projectId = (projectResult.rows[0] as any).id;
-      }
-    } catch (e) {
-      // If RETURNING fails, use old approach
-      console.log('RETURNING not supported, using alternative method');
       await db.execute({
         sql: `INSERT INTO projects (title, club_name, category, location, description, status, start_date, end_date, fundraising_link, external_links, contact_person, created_by) 
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         args: [title, clubName, category, location, description, status, startDate || null, endDate || null, fundraisingLink || null, externalLinks || null, contactPerson || null, userId]
       });
 
-      // Get last inserted ID
-      const lastIdResult = await db.execute({
-        sql: 'SELECT max(id) as id FROM projects'
-      });
-      projectId = (lastIdResult.rows[0] as any).id;
+      console.log('Project inserted successfully');
+    } catch (insertError) {
+      console.error('Insert failed:', insertError);
+      throw insertError;
     }
 
+    // Get the project ID using max
+    const idResult = await db.execute({
+      sql: 'SELECT MAX(id) as id FROM projects WHERE created_by = ? ORDER BY id DESC LIMIT 1'  ,
+      args: [userId]
+    });
+
+    const projectId = (idResult.rows[0] as any)?.id;
+
     if (!projectId) {
-      throw new Error('Failed to get project ID');
+      throw new Error('Could not retrieve project ID after insertion');
     }
 
     console.log('Project created with ID:', projectId);
