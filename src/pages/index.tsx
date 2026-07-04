@@ -52,7 +52,7 @@ const HomePage: React.FC = () => {
               Connecting clubs, sharing projects, and creating transformational impact in communities around the world.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-12">
+            <div className="flex justify-center items-center mt-12">
               <Link 
                 href="/pre-access"
                 className="group inline-flex items-center px-8 py-4 bg-white text-rotary-blue font-bold rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-yellow-400"
@@ -61,16 +61,6 @@ const HomePage: React.FC = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0H3z" />
                 </svg>
                 Request Free Access
-              </Link>
-
-              <Link 
-                href="/login"
-                className="group inline-flex items-center px-8 py-4 bg-yellow-500 text-white font-bold rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-blue-600"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-6 6M7.5 21H9l3-6h8a3 3 0 013 3v3M21 12l-5 5 5 5V12z" />
-                </svg>
-                Access Existing Portal
               </Link>
             </div>
 
