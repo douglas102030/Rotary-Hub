@@ -30,28 +30,45 @@ const LoginPage: React.FC = () => {
   return (
     <Layout title="Portal Sign In">
       {/* Hero Background */}
-      <div className="relative bg-gradient-to-br from-rotary-blue to-rotary-dark-blue min-h-[80vh] flex items-center justify-center py-12 lg:py-24 overflow-hidden before:absolute before:inset-0 before:bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxMDAiIGN5PSIxMDAiIHI9IiAyIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiIC8+PC9zdmc+') before:bg-[60px_60px]">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-50/3" />
+      <div className="relative bg-gradient-to-b from-gray-50 to-white min-h-[90vh] flex flex-col items-center justify-center py-12 lg:py-24 overflow-hidden">
+        {/* Subtle Accent Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-rotary-gold/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-rotary-blue/5 rounded-full blur-3xl" />
+        </div>
 
         {/* Logo */}
-        <div className="container mx-auto px-4 relative z-10 mb-8 animate-fade-in-down text-center">
-          <Link href="/" className="inline-flex items-center space-x-2 group focus:outline-none focus:ring-4 focus:ring-yellow-500 rounded-lg p-2 hover:bg-white/5 transition-all duration-300">
-            <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full shadow-xl flex items-center justify-center transform group-hover:scale-110 transition-transform duration-500 border-4 border-white/20 overflow-hidden">
-              <Image src="/rotary-logo.png" alt="Rotary logo" width={64} height={64} className="h-full w-full object-contain" priority />
-            </div>
+        <div className="container mx-auto px-4 relative z-10 mb-12 animate-fade-in-down text-center">
+          <Link href="/" className="inline-flex items-center justify-center group focus:outline-none focus:ring-4 focus:ring-rotary-gold rounded-full p-4 hover:bg-rotary-blue/5 transition-all duration-300">
+            <Image 
+              src="/rotary-logo-official.jpeg" 
+              alt="Rotary logo" 
+              width={280} 
+              height={140} 
+              className="drop-shadow-lg transform group-hover:scale-105 transition-transform duration-500"
+              priority
+            />
           </Link>
+          <p className="mt-6 text-lg text-rotary-blue font-medium">Connecting Clubs, Sharing Projects, Creating Impact</p>
         </div>
 
         {/* Login Card */}
-        <div className="container mx-auto px-4 relative z-20 flex items-center justify-center">
+        <div className="container mx-auto px-4 relative z-20 flex items-center justify-center mb-8">
           <div className="w-full max-w-md animate-fade-in-up [animation-delay:300ms]">
-            <LoginForm onSubmit={handleSubmit} errorMessage={errorMessage} />
+            <div className="bg-white rounded-2xl shadow-xl p-8 border border-rotary-gold/20">
+              <div className="mb-8">
+                <h2 className="text-3xl font-bold text-rotary-blue text-center">Sign In</h2>
+                <p className="text-center text-gray-600 text-sm mt-2">Access your Rotary Club account</p>
+              </div>
+              <LoginForm onSubmit={handleSubmit} errorMessage={errorMessage} />
 
-            <Link href="/" className="block w-full text-right mt-6 hover:text-yellow-500 transition-colors">
-              Back to home
-            </Link>
+              <Link href="/" className="block w-full text-center mt-6 text-gray-600 hover:text-rotary-gold transition-colors font-medium">
+                ← Back to home
+              </Link>
+            </div>
           </div>
         </div>
+
       </div>
 
     </Layout>

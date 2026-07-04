@@ -49,6 +49,14 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+.animate-fade-in-down {
+  animation: fadeInDown 0.8s ease-out forwards;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
 /* Form Styles */
 .form-input, .form-textarea, .form-select {
   @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:border-blue-500 transition-all duration-200;

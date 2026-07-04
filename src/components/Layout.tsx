@@ -2,6 +2,7 @@ import React from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useSession, signOut } from 'next-auth/react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -11,6 +12,21 @@ interface LayoutProps {
 const CURRENT_YEAR = 2026;
 
 const Layout: React.FC<LayoutProps> = ({ children, title = 'Rotary Club HUB Projects' }) => {
+  const { data: session } = useSession();
+
+  const handleLogout = async () => {
+    try {
+      console.log('Iniciando logout...');
+      const result = await signOut({ redirect: false });
+      console.log('Logout resultado:', result);
+      if (result) {
+        window.location.href = '/';
+      }
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Head>
@@ -32,13 +48,22 @@ const Layout: React.FC<LayoutProps> = ({ children, title = 'Rotary Club HUB Proj
               <li><Link href="/" className="hover:text-rotary-gold transition">Home</Link></li>
               <li><Link href="/projects" className="hover:text-rotary-gold transition">Projects</Link></li>
               <li><Link href="/dashboard" className="hover:text-rotary-gold transition">Dashboard</Link></li>
-              {/*
-              <li><Link href="/admin" className="hover:text-rotary-gold transition">Admin</Link></li>
-              */}
             </ul>
           </nav>
-          <div>
-            <Link href="/login" className="btn-secondary">Login</Link>
+          <div className="flex items-center space-x-4">
+            {session ? (
+              <>
+                <span className="text-sm font-medium">{session.user?.name}</span>
+                <button
+                  onClick={handleLogout}
+                  className="btn-secondary"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link href="/login" className="btn-secondary">Login</Link>
+            )}
           </div>
         </div>
       </header>

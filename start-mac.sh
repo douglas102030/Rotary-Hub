@@ -50,5 +50,5 @@ fi
 echo "🚀 Iniciando servidor de desenvolvimento..."
 echo "Acesse: http://localhost:3000"
 
-# Iniciar o servidor Next.js
-npm run dev
+# Iniciar o servidor Next.js na porta 3000
+npm run dev -- -p 3000

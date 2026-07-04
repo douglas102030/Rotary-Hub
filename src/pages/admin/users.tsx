@@ -1,11 +1,26 @@
 import React from 'react';
+import Link from 'next/link';
 import Layout from '../../components/Layout';
 
 const UsersPage: React.FC = () => {
   return (
     <Layout title="User Management">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-rotary-blue mb-6">User Management</h1>
+        <h1 className="text-3xl font-bold text-rotary-blue mb-6">Admin Panel</h1>
+
+        {/* Admin Navigation Tabs */}
+        <div className="flex gap-4 mb-8 border-b border-gray-200">
+          <Link href="/admin/users">
+            <span className="px-4 py-3 text-rotary-blue font-semibold border-b-2 border-rotary-blue cursor-pointer">
+              User Management
+            </span>
+          </Link>
+          <Link href="/admin/pre-access-requests">
+            <span className="px-4 py-3 text-gray-600 hover:text-rotary-blue font-semibold cursor-pointer">
+              Pre-Access Requests
+            </span>
+          </Link>
+        </div>
         
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <div className="flex justify-between items-center mb-6">
