@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import Layout from '../../components/Layout';
 
 interface PreAccessRequest {
@@ -112,8 +113,29 @@ const PreAccessRequestsPage: React.FC = () => {
 
   return (
     <Layout title="Pre-Access Requests">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-rotary-blue mb-6">Pedidos de Pré-Cadastro</h1>
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold text-rotary-blue mb-6">Admin Panel</h1>
+
+        {/* Admin Navigation Tabs */}
+        <div className="flex gap-4 mb-8 border-b border-gray-200">
+          <Link href="/admin/users">
+            <span className="px-4 py-3 text-gray-600 hover:text-rotary-blue font-semibold cursor-pointer">
+              User Management
+            </span>
+          </Link>
+          <Link href="/admin/pre-access-requests">
+            <span className="px-4 py-3 text-rotary-blue font-semibold border-b-2 border-rotary-blue cursor-pointer">
+              Pre-Access Requests
+            </span>
+          </Link>
+          <Link href="/admin/email-settings">
+            <span className="px-4 py-3 text-gray-600 hover:text-rotary-blue font-semibold cursor-pointer">
+              Email Settings
+            </span>
+          </Link>
+        </div>
+
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Pedidos de Pré-Cadastro</h2>
 
         {/* Filters */}
         <div className="bg-white rounded-lg shadow-md p-4 mb-6">

@@ -164,6 +164,22 @@ export async function initDatebase() {
       )
     `);
 
+    // Email configuration
+    await client.execute(`
+      CREATE TABLE IF NOT EXISTS email_config (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email_address TEXT NOT NULL,
+        smtp_host TEXT NOT NULL,
+        smtp_port INTEGER NOT NULL,
+        smtp_user TEXT NOT NULL,
+        smtp_password TEXT NOT NULL,
+        sender_name TEXT,
+        is_active BOOLEAN DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     console.log('Database initialized successfully.');
   } catch (error) {
     console.error('Error initializing database:', error);

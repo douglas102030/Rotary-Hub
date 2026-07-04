@@ -143,6 +143,11 @@ const UsersPage: React.FC = () => {
               Pre-Access Requests
             </span>
           </Link>
+          <Link href="/admin/email-settings">
+            <span className="px-4 py-3 text-gray-600 hover:text-rotary-blue font-semibold cursor-pointer">
+              Email Settings
+            </span>
+          </Link>
         </div>
         
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">

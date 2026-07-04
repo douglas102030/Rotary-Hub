@@ -21,6 +21,7 @@
     "dotenv": "^17.4.2",
     "next": "15.5.20",
     "next-auth": "^4.24.14",
+    "nodemailer": "^7.0.13",
     "puppeteer": "^25.3.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -30,6 +31,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@types/nodemailer": "^8.0.1",
     "autoprefixer": "^10.4.17",
     "eslint": "8.57.1",
     "eslint-config-next": "15.5.20",
