@@ -176,8 +176,6 @@ const NewProjectPage: React.FC = () => {
     setImages(images.filter(img => img.id !== id));
   };
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
