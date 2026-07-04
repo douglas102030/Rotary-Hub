@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Layout from '../../components/Layout';
+import FundraisingWidget from '../../components/FundraisingWidget';
 
 interface ProjectPhoto {
   id: number;
@@ -73,6 +74,9 @@ const ProjectDetailPage: React.FC = () => {
                 </p>
               </div>
             </div>
+
+            {/* Fundraising Widget */}
+            <FundraisingWidget goFundMeUrl="https://www.gofundme.com/f/sample-project-campaign" />
 
             {/* Photo Gallery */}
             <div className="bg-white rounded-lg shadow-md p-6">

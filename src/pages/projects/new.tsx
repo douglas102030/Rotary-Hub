@@ -19,6 +19,7 @@ const NewProjectPage: React.FC = () => {
     startDate: '',
     endDate: '',
     fundraisingLink: '',
+    goFundMeUrl: '',
     externalLinks: '',
     contactPerson: '',
   });
@@ -272,6 +273,22 @@ const NewProjectPage: React.FC = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rotary-blue"
                   placeholder="https://example.com/campaign"
                 />
+              </div>
+
+              <div>
+                <label htmlFor="goFundMeUrl" className="block text-sm font-medium text-gray-700 mb-1">
+                  GoFundMe Campaign URL
+                </label>
+                <input
+                  type="url"
+                  id="goFundMeUrl"
+                  name="goFundMeUrl"
+                  value={formData.goFundMeUrl}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rotary-blue"
+                  placeholder="https://www.gofundme.com/f/your-campaign"
+                />
+                <p className="mt-1 text-xs text-gray-500">Add a GoFundMe campaign to display live fundraising progress</p>
               </div>
 
               <div>
