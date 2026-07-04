@@ -19,24 +19,24 @@ export default async function handler(
     const db = getDatebaseClient();
 
     // Get project
-    const projectResult = await db.execute({
+    const projectResult = db.execute({
       sql: 'SELECT * FROM projects WHERE id = ?',
       args: [id]
     });
 
-    if (projectResult.rows.length === 0) {
+    if (!projectResult.rows || projectResult.rows.length === 0) {
       return res.status(404).json({ message: 'Project not found' });
     }
 
     const project = projectResult.rows[0];
 
     // Get project photos
-    const photosResult = await db.execute({
+    const photosResult = db.execute({
       sql: 'SELECT * FROM project_photos WHERE project_id = ?',
       args: [id]
     });
 
-    const photos = photosResult.rows || [];
+    const photos = (photosResult.rows && photosResult.rows.length > 0) ? photosResult.rows : [];
 
     return res.status(200).json({
       success: true,
