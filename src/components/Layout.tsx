@@ -41,8 +41,8 @@ const Layout: React.FC<LayoutProps> = ({ children, title = 'Rotary Ireland Hub' 
             <Image 
               src="/rotary-logo-official.jpeg" 
               alt="Rotary Ireland Hub" 
-              width={160} 
-              height={50} 
+              width={120} 
+              height={38} 
               className="h-auto w-auto"
               priority
             />
@@ -84,8 +84,8 @@ const Layout: React.FC<LayoutProps> = ({ children, title = 'Rotary Ireland Hub' 
                 <Image 
                   src="/rotary-logo-official.jpeg" 
                   alt="Rotary Ireland Hub" 
-                  width={140} 
-                  height={40} 
+                  width={100} 
+                  height={30} 
                   className="h-auto"
                 />
               </div>
