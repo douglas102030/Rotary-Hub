@@ -63,18 +63,40 @@ export default async function handler(
     const userId = (userResult.rows[0] as any).id;
 
     // Insert project and get the ID back using RETURNING (libSQL supports this)
-    const projectResult = await db.execute({
-      sql: `INSERT INTO projects (title, club_name, category, location, description, status, start_date, end_date, fundraising_link, external_links, contact_person, created_by) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            RETURNING id`,
-      args: [title, clubName, category, location, description, status, startDate || null, endDate || null, fundraisingLink || null, externalLinks || null, contactPerson || null, userId]
-    });
+    let projectId: any;
+    
+    try {
+      // Try with RETURNING first
+      const projectResult = await db.execute({
+        sql: `INSERT INTO projects (title, club_name, category, location, description, status, start_date, end_date, fundraising_link, external_links, contact_person, created_by) 
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              RETURNING id`,
+        args: [title, clubName, category, location, description, status, startDate || null, endDate || null, fundraisingLink || null, externalLinks || null, contactPerson || null, userId]
+      });
 
-    if (!projectResult.rows || projectResult.rows.length === 0) {
-      throw new Error('Failed to insert project or get ID');
+      if (projectResult.rows && projectResult.rows.length > 0) {
+        projectId = (projectResult.rows[0] as any).id;
+      }
+    } catch (e) {
+      // If RETURNING fails, use old approach
+      console.log('RETURNING not supported, using alternative method');
+      await db.execute({
+        sql: `INSERT INTO projects (title, club_name, category, location, description, status, start_date, end_date, fundraising_link, external_links, contact_person, created_by) 
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        args: [title, clubName, category, location, description, status, startDate || null, endDate || null, fundraisingLink || null, externalLinks || null, contactPerson || null, userId]
+      });
+
+      // Get last inserted ID
+      const lastIdResult = await db.execute({
+        sql: 'SELECT max(id) as id FROM projects'
+      });
+      projectId = (lastIdResult.rows[0] as any).id;
     }
 
-    const projectId = (projectResult.rows[0] as any).id;
+    if (!projectId) {
+      throw new Error('Failed to get project ID');
+    }
+
     console.log('Project created with ID:', projectId);
 
     // Insert project photos (if any)
@@ -110,9 +132,12 @@ export default async function handler(
     });
   } catch (error) {
     console.error('Error creating project:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('Error details:', errorMessage);
     return res.status(500).json({
       message: 'Error creating project',
-      error: (error as Error).message
+      error: errorMessage,
+      details: error instanceof Error ? error.stack : undefined
     });
   }
 }
