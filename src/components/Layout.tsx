@@ -54,6 +54,7 @@ const Layout: React.FC<LayoutProps> = ({ children, title = 'Rotary Ireland Hub' 
               <ul className="flex space-x-6">
                 <li><Link href="/" className="hover:text-rotary-gold transition">Home</Link></li>
                 <li><Link href="/projects" className="hover:text-rotary-gold transition">Projects</Link></li>
+                <li><Link href="/campaigns" className="hover:text-rotary-gold transition">Campaigns</Link></li>
                 <li><Link href="/dashboard" className="hover:text-rotary-gold transition">Dashboard</Link></li>
               </ul>
             </nav>
