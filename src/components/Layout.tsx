@@ -36,14 +36,14 @@ const Layout: React.FC<LayoutProps> = ({ children, title = 'Rotary Ireland Hub' 
       </Head>
 
       <header className="bg-rotary-blue text-white shadow-md">
-        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+        <div className="container mx-auto px-4 py-2 flex justify-between items-center">
           <Link href="/" className="flex items-center hover:opacity-90 transition-opacity">
             <Image 
               src="/rotary-logo-official.jpeg" 
               alt="Rotary Ireland Hub" 
-              width={280} 
-              height={60} 
-              className="h-auto w-auto max-w-xs"
+              width={160} 
+              height={50} 
+              className="h-auto w-auto"
               priority
             />
           </Link>
@@ -84,8 +84,8 @@ const Layout: React.FC<LayoutProps> = ({ children, title = 'Rotary Ireland Hub' 
                 <Image 
                   src="/rotary-logo-official.jpeg" 
                   alt="Rotary Ireland Hub" 
-                  width={180} 
-                  height={50} 
+                  width={140} 
+                  height={40} 
                   className="h-auto"
                 />
               </div>

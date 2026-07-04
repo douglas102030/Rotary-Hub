@@ -43,9 +43,9 @@ const LoginPage: React.FC = () => {
             <Image 
               src="/rotary-logo-official.jpeg" 
               alt="Rotary Ireland Hub" 
-              width={320} 
-              height={160} 
-              className="drop-shadow-lg transform group-hover:scale-105 transition-transform duration-500"
+              width={240} 
+              height={100} 
+              className="drop-shadow-lg transform group-hover:scale-105 transition-transform duration-500 h-auto"
               priority
             />
           </Link>
