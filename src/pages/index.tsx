@@ -186,17 +186,19 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Footer Previews */}
-      <footer className="bg-blue-950 py-12 border-t border-white/10 relative z-10 -mt-8">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-gray-300 text-sm mb-4">&copy; {CURRENT_YEAR} Rotary Club HUB Projects. All rights reserved.</p>
-          
-          <div className="flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm">
-            <a href="#" className="text-blue-400 hover:text-yellow-500 transition-colors">Terms of Use</a>
-            <span className="hidden sm:inline-block px-3 border-r border-white/10">•</span>
-            <a href="#" className="text-blue-400 hover:text-yellow-500 transition-colors">Privacy Policy</a>
-            <span className="px-2 md:hidden text-gray-500">|</span>
-            <a href="#" className="text-blue-400 hover:text-yellow-500 transition-colors">Support</a>
+      {/* Footer */}
+      <footer className="bg-blue-950 py-4 border-t border-white/10">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-3 text-xs md:text-sm">
+            <p className="text-gray-400">&copy; {CURRENT_YEAR} Rotary Club HUB Projects</p>
+            
+            <div className="flex flex-wrap justify-center gap-3 md:gap-5">
+              <a href="#" className="text-gray-400 hover:text-yellow-500 transition-colors">Terms of Use</a>
+              <a href="#" className="text-gray-400 hover:text-yellow-500 transition-colors">Privacy Policy</a>
+              <a href="#" className="text-gray-400 hover:text-yellow-500 transition-colors">Support</a>
+            </div>
+
+            <p className="text-gray-500">By <span className="text-yellow-500 font-medium">Douglas Ottolini</span> | <span className="text-yellow-500 font-medium">DNOB Tech</span></p>
           </div>
         </div>
       </footer>

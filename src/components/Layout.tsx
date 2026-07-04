@@ -88,29 +88,20 @@ const Layout: React.FC<LayoutProps> = ({ children, title = 'Rotary Ireland Hub' 
         {children}
       </main>
 
-      <footer className="bg-rotary-dark-blue text-white py-8">
+      <footer className="bg-rotary-dark-blue text-white py-4 border-t border-white/10">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-4 md:mb-0">
-              <div className="flex items-center">
-                <Image 
-                  src="/rotary-logo-official.jpeg" 
-                  alt="Rotary Ireland Hub" 
-                  width={100} 
-                  height={30} 
-                  className="h-auto"
-                />
-              </div>
-              <p className="mt-2 text-sm text-gray-300">Connecting clubs, sharing projects, creating impact.</p>
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
+            <div className="text-gray-300">
+              <p>© {CURRENT_YEAR} Rotary Club HUB Projects</p>
             </div>
-            <div className="flex space-x-4">
-              <a href="#" className="text-gray-300 hover:text-rotary-gold transition">About</a>
-              <a href="#" className="text-gray-300 hover:text-rotary-gold transition">Contact</a>
-              <a href="#" className="text-gray-300 hover:text-rotary-gold transition">Privacy</a>
+            <div className="flex space-x-5">
+              <a href="#" className="text-gray-300 hover:text-rotary-gold transition text-xs">About</a>
+              <a href="#" className="text-gray-300 hover:text-rotary-gold transition text-xs">Contact</a>
+              <a href="#" className="text-gray-300 hover:text-rotary-gold transition text-xs">Privacy</a>
             </div>
-          </div>
-          <div className="mt-8 text-center text-sm text-gray-400">
-            <p>© {CURRENT_YEAR} Rotary Club HUB Projects. All rights reserved.</p>
+            <div className="text-gray-400 text-xs">
+              <p>Created by <span className="text-rotary-gold font-medium">Douglas Ottolini</span> | <span className="text-rotary-gold font-medium">DNOB Tech</span></p>
+            </div>
           </div>
         </div>
       </footer>
