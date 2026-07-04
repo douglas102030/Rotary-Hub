@@ -6,6 +6,7 @@ interface ProjectImage {
   id: string;
   src: string;
   name: string;
+  isExternal?: boolean;
 }
 
 const NewProjectPage: React.FC = () => {
@@ -65,42 +66,25 @@ const NewProjectPage: React.FC = () => {
         fundraisingLink: formData.goFundMeUrl
       }));
 
-      // Carregar imagens extraídas
+      // Carregar imagens extraídas - usar URLs diretas
       if (data.images && data.images.length > 0) {
-        data.images.forEach((imageUrl: string, index: number) => {
-          // Carregar imagem a partir da URL
-          const img = new window.Image();
-          img.crossOrigin = 'anonymous';
-          img.onload = () => {
-            try {
-              const canvas = document.createElement('canvas');
-              canvas.width = img.width;
-              canvas.height = img.height;
-              const ctx = canvas.getContext('2d');
-              if (ctx) {
-                ctx.drawImage(img, 0, 0);
-                const dataUrl = canvas.toDataURL('image/jpeg');
-                setImages(prev => [...prev, {
-                  id: Math.random().toString(36),
-                  src: dataUrl,
-                  name: `GoFundMe-Photo-${index + 1}.jpg`
-                }]);
-              }
-            } catch (err) {
-              console.error('Error processing image:', err);
-            }
-          };
-          img.src = imageUrl;
-        });
+        const extractedImages: ProjectImage[] = data.images.map((imageUrl: string, index: number) => ({
+          id: `gofundme-${Date.now()}-${index}`,
+          src: imageUrl,
+          name: `GoFundMe-Photo-${index + 1}.jpg`,
+          isExternal: true
+        }));
+        
+        setImages(prev => [...prev, ...extractedImages]);
 
         setFeedbackMessage({ 
           type: 'success', 
-          text: `Successfully extracted project data! Added ${data.images.length} images.` 
+          text: `✅ Successfully extracted! Title, description, and ${data.images.length} photos loaded.` 
         });
       } else {
         setFeedbackMessage({ 
           type: 'success', 
-          text: 'Successfully extracted project data! No images found.' 
+          text: 'Successfully extracted project data (no photos found).' 
         });
       }
     } catch (error) {
@@ -380,7 +364,11 @@ const NewProjectPage: React.FC = () => {
                 <p className="mt-1 text-xs text-gray-500">Paste a GoFundMe URL and click &quot;Auto-fill&quot; to extract project name, description, and images automatically!</p>
                 
                 {feedbackMessage && (
-                  <div className={`mt-2 p-2 rounded text-sm ${feedbackMessage.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                  <div className={`mt-3 p-3 rounded-lg text-sm font-medium animate-pulse ${
+                    feedbackMessage.type === 'success' 
+                      ? 'bg-green-100 text-green-800 border border-green-300' 
+                      : 'bg-red-100 text-red-800 border border-red-300'
+                  }`}>
                     {feedbackMessage.text}
                   </div>
                 )}
@@ -451,13 +439,27 @@ const NewProjectPage: React.FC = () => {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {images.map((image) => (
                     <div key={image.id} className="relative group">
-                      <div className="relative w-full h-40 bg-gray-200 rounded-lg overflow-hidden">
-                        <Image
-                          src={image.src}
-                          alt={image.name}
-                          fill
-                          className="object-cover"
-                        />
+                      <div className="relative w-full h-40 bg-gray-200 rounded-lg overflow-hidden border border-gray-300">
+                        {image.isExternal ? (
+                          // Para URLs externas, usar img tag simples
+                          <img
+                            src={image.src}
+                            alt={image.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              console.error('Failed to load image:', image.src);
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          // Para imagens locais, usar Next Image
+                          <Image
+                            src={image.src}
+                            alt={image.name}
+                            fill
+                            className="object-cover"
+                          />
+                        )}
                       </div>
                       <p className="text-xs text-gray-600 mt-2 truncate">{image.name}</p>
                       <button
