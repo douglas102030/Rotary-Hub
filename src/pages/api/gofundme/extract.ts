@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import axios from 'axios';
+import puppeteer from 'puppeteer';
 import * as cheerio from 'cheerio';
 
 interface ExtractedData {
@@ -36,78 +36,121 @@ export default async function handler(
     });
   }
 
+  let browser;
   try {
-    // Fazer requisição para obter o HTML da página
-    const response = await axios.get(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-      },
-      timeout: 10000
+    // Inicializar Puppeteer com modo sem cabeçalho
+    browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      timeout: 30000
     });
 
-    const html = response.data;
+    const page = await browser.newPage();
+    
+    // Configurar timeout
+    page.setDefaultTimeout(30000);
+    page.setDefaultNavigationTimeout(30000);
+
+    // Navegar para a URL
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+
+    // Esperar o conteúdo carregar
+    await page.waitForSelector('h1, [data-qa="campaign-title"], .campaign-title', { 
+      timeout: 10000 
+    }).catch(() => null);
+
+    // Pegar o HTML renderizado
+    const html = await page.content();
     const $ = cheerio.load(html);
 
-    // Extrair título - tenta vários seletores comuns
+    // Extrair título - tenta vários seletores
     let title = '';
-    title = $('h1').first().text().trim() || 
-            $('[data-reactroot] h1').first().text().trim() ||
+    title = $('h1').first().text().trim() ||
+            $('[data-qa="campaign-title"]').first().text().trim() ||
+            $('.campaign-title').first().text().trim() ||
             $('meta[property="og:title"]').attr('content') ||
-            $('title').text().split('-')[0].trim() ||
             '';
 
-    // Extrair descrição - procura por story text ou paragraphs
+    // Remover "GoFundMe" do título se estiver lá
+    title = title.replace(/\s*-\s*GoFundMe\s*$/i, '').trim();
+
+    // Extrair descrição - procura pelo story/description
     let description = '';
-    const storyText = $('.story-text').text() || 
-                      $('[class*="description"]').first().text() ||
-                      $('meta[property="og:description"]').attr('content') ||
-                      $('p').first().text() ||
-                      '';
-    description = storyText.substring(0, 500).trim(); // Limitar a 500 caracteres
+    
+    // Tentar vários seletores comuns no GoFundMe
+    const descriptionText = 
+      $('[data-qa="campaign-description"]').text() ||
+      $('.campaign-description').text() ||
+      $('[class*="story"]').first().text() ||
+      $('meta[property="og:description"]').attr('content') ||
+      $('p').filter((i, el) => $(el).text().length > 100).first().text() ||
+      '';
+
+    description = descriptionText.substring(0, 500).trim();
 
     // Extrair imagens
     const images: string[] = [];
     
-    // Procura por images nos atributos de dados (Next.js)
+    // Procura por images no atributo src e srcset
     $('img').each((_, elem) => {
-      const src = $(elem).attr('src') || $(elem).attr('data-src');
-      if (src && 
-          src.startsWith('http') && 
-          !src.includes('gstatic') && 
-          !src.includes('logo') &&
-          images.length < 10) {
-        // Filtrar imagens de logo/ícones
-        if (!images.includes(src)) {
+      const src = $(elem).attr('src') || 
+                 $(elem).attr('data-src') ||
+                 $(elem).attr('data-lazy-src');
+      
+      if (src && src.startsWith('http') && images.length < 10) {
+        // Filtrar imagens de navegação/ícones
+        if (!src.includes('logo') && 
+            !src.includes('icon') &&
+            !src.includes('gstatic') &&
+            !src.includes('avatar') &&
+            !images.includes(src)) {
           images.push(src);
         }
       }
     });
 
-    // Se não encontrou muitas imagens, procura no Open Graph
+    // Se não encontrou muitas imagens, procurar em Open Graph
     if (images.length < 3) {
       const ogImage = $('meta[property="og:image"]').attr('content');
-      if (ogImage && ogImage.startsWith('http')) {
+      if (ogImage && ogImage.startsWith('http') && !images.includes(ogImage)) {
         images.push(ogImage);
       }
     }
 
+    // Validar dados extraídos
+    if (!title || title.length < 3) {
+      return res.status(400).json({
+        success: false,
+        title: '',
+        description: '',
+        images: [],
+        message: 'Could not extract campaign title. Make sure the URL is correct and the campaign is public.'
+      });
+    }
+
+    await browser.close();
+
     return res.status(200).json({
       success: true,
-      title: title || 'Campaign Title',
+      title: title.substring(0, 200),
       description: description || 'Campaign description not available',
-      images: images.slice(0, 10), // Máximo 10 imagens
+      images: images.slice(0, 10),
       message: 'Data extracted successfully'
     });
 
   } catch (error) {
     console.error('Error extracting GoFundMe data:', error);
     
+    if (browser) {
+      await browser.close().catch(() => null);
+    }
+    
     return res.status(500).json({
       success: false,
       title: '',
       description: '',
       images: [],
-      message: 'Failed to extract data from GoFundMe URL. Make sure the URL is correct and the campaign is public.'
+      message: `Failed to extract data: ${error instanceof Error ? error.message : 'Unknown error'}. Make sure the URL is correct and the campaign is public.`
     });
   }
 }
