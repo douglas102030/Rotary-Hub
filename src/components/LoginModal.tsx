@@ -70,19 +70,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 
         {/* Login Form */}
         <LoginForm onSubmit={handleSubmit} errorMessage={errorMessage} />
-
-        {/* Signup Link */}
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
-            Don&apos;t have an account?{' '}
-            <button
-              onClick={onClose}
-              className="text-rotary-blue font-semibold hover:text-rotary-gold transition-colors"
-            >
-              Request pre-access
-            </button>
-          </p>
-        </div>
       </div>
     </div>
   );
