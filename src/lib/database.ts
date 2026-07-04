@@ -42,6 +42,13 @@ export async function initDatebase() {
 
     await ensureColumn('users', 'username', 'TEXT UNIQUE');
 
+    // Ensure fundraising columns exist in projects table
+    await ensureColumn('projects', 'raised', 'DECIMAL(10, 2) DEFAULT 0');
+    await ensureColumn('projects', 'goal', 'DECIMAL(10, 2) DEFAULT 0');
+    await ensureColumn('projects', 'crowdfunder_url', 'TEXT');
+    await ensureColumn('projects', 'gofundme_url', 'TEXT');
+    await ensureColumn('projects', 'last_progress_update', 'DATETIME');
+
     // Pre-access requests
     await client.execute(`
       CREATE TABLE IF NOT EXISTS access_requests (

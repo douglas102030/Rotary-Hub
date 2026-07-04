@@ -27,6 +27,7 @@ const NewProjectPage: React.FC = () => {
     endDate: '',
     fundraisingLink: '',
     goFundMeUrl: '',
+    crowdfunderUrl: '',
     externalLinks: '',
     contactPerson: '',
   });
@@ -34,8 +35,10 @@ const NewProjectPage: React.FC = () => {
   const [images, setImages] = useState<ProjectImage[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [isLoadingGoFundMe, setIsLoadingGoFundMe] = useState(false);
+  const [isLoadingCrowdfunder, setIsLoadingCrowdfunder] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [fundraisingProgress, setFundraisingProgress] = useState<{ raised: number; goal: number } | null>(null);
 
   // NOW check authentication status
   if (status === 'loading') {
@@ -118,6 +121,75 @@ const NewProjectPage: React.FC = () => {
       setFeedbackMessage({ type: 'error', text: 'An error occurred while extracting data' });
     } finally {
       setIsLoadingGoFundMe(false);
+    }
+  };
+
+  const extractCrowdfunderData = async () => {
+    if (!formData.crowdfunderUrl) {
+      setFeedbackMessage({ type: 'error', text: 'Please enter a Crowdfunder URL first' });
+      return;
+    }
+
+    setIsLoadingCrowdfunder(true);
+    setFeedbackMessage(null);
+
+    try {
+      const response = await fetch('/api/crowdfunder/extract', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: formData.crowdfunderUrl })
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        setFeedbackMessage({ type: 'error', text: data.message || 'Failed to extract data' });
+        return;
+      }
+
+      // Populate fields automatically
+      setFormData(prev => ({
+        ...prev,
+        title: data.title || prev.title,
+        description: data.description || prev.description,
+        fundraisingLink: formData.crowdfunderUrl
+      }));
+
+      // Set fundraising goal if available
+      if (data.goal) {
+        setFundraisingProgress({
+          raised: data.raised || 0,
+          goal: data.goal || 0
+        });
+      }
+
+      // Load extracted images
+      if (data.images && data.images.length > 0) {
+        const extractedImages: ProjectImage[] = data.images.map((imageUrl: string, index: number) => ({
+          id: `crowdfunder-${Date.now()}-${index}`,
+          src: imageUrl,
+          name: `Crowdfunder-Photo-${index + 1}.jpg`,
+          isExternal: true
+        }));
+        
+        setImages(prev => [...prev, ...extractedImages]);
+
+        const goalText = data.goal ? ` Goal: £${data.goal.toLocaleString()}, Raised: £${data.raised?.toLocaleString() || '0'}` : '';
+        setFeedbackMessage({ 
+          type: 'success', 
+          text: `✅ Successfully extracted! Title, description, and ${data.images.length} photos loaded.${goalText}` 
+        });
+      } else {
+        setFeedbackMessage({ 
+          type: 'success', 
+          text: 'Successfully extracted project data (no photos found).' 
+        });
+      }
+    } catch (error) {
+      console.error('Error extracting data:', error);
+      setFeedbackMessage({ type: 'error', text: 'An error occurred while extracting Crowdfunder data' });
+    } finally {
+      setIsLoadingCrowdfunder(false);
     }
   };
 
@@ -230,10 +302,12 @@ const NewProjectPage: React.FC = () => {
         endDate: '',
         fundraisingLink: '',
         goFundMeUrl: '',
+        crowdfunderUrl: '',
         externalLinks: '',
         contactPerson: '',
       });
       setImages([]);
+      setFundraisingProgress(null);
 
       // Redirect to projects page after 2 seconds
       setTimeout(() => {
@@ -462,6 +536,47 @@ const NewProjectPage: React.FC = () => {
                       : 'bg-red-100 text-red-800 border border-red-300'
                   }`}>
                     {feedbackMessage.text}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="crowdfunderUrl" className="block text-sm font-medium text-gray-700 mb-1">
+                  Crowdfunder Campaign URL
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    id="crowdfunderUrl"
+                    name="crowdfunderUrl"
+                    value={formData.crowdfunderUrl}
+                    onChange={handleChange}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rotary-blue"
+                    placeholder="https://www.crowdfunder.co.uk/your-campaign"
+                  />
+                  <button
+                    type="button"
+                    onClick={extractCrowdfunderData}
+                    disabled={isLoadingCrowdfunder || !formData.crowdfunderUrl}
+                    className="px-4 py-2 bg-rotary-gold text-rotary-blue font-medium rounded-md hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed transition whitespace-nowrap"
+                  >
+                    {isLoadingCrowdfunder ? 'Loading...' : '✨ Auto-fill'}
+                  </button>
+                </div>
+                <p className="mt-1 text-xs text-gray-500">Paste a Crowdfunder URL and click &quot;Auto-fill&quot; to extract project name, description, images, and fundraising progress automatically!</p>
+                
+                {fundraisingProgress && (
+                  <div className="mt-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
+                    <div className="flex justify-between text-sm font-medium text-gray-700 mb-2">
+                      <span>Fundraising Progress</span>
+                      <span>£{fundraisingProgress.raised?.toLocaleString()} / £{fundraisingProgress.goal?.toLocaleString()}</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-rotary-gold h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${fundraisingProgress.goal ? Math.min(100, (fundraisingProgress.raised / fundraisingProgress.goal) * 100) : 0}%` }}
+                      ></div>
+                    </div>
                   </div>
                 )}
               </div>
