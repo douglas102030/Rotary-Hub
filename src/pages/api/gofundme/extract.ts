@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import puppeteer from 'puppeteer';
-import * as cheerio from 'cheerio';
 
 interface ExtractedData {
   title: string;
@@ -55,70 +54,126 @@ export default async function handler(
     await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
 
     // Esperar o conteúdo carregar
-    await page.waitForSelector('h1, [data-qa="campaign-title"], .campaign-title', { 
+    await page.waitForSelector('h1, [data-qa="campaign-title"], .campaign-title, img', { 
       timeout: 10000 
     }).catch(() => null);
 
-    // Pegar o HTML renderizado
-    const html = await page.content();
-    const $ = cheerio.load(html);
+    // Esperar mais um pouco para lazy-loading
+    await page.waitForTimeout(2000);
 
-    // Extrair título - tenta vários seletores
-    let title = '';
-    title = $('h1').first().text().trim() ||
-            $('[data-qa="campaign-title"]').first().text().trim() ||
-            $('.campaign-title').first().text().trim() ||
-            $('meta[property="og:title"]').attr('content') ||
-            '';
+    // Executar JavaScript para extrair dados mais confiáveis
+    const extractedData = await page.evaluate(() => {
+      // Extrair título
+      let title = '';
+      const titleEl = 
+        document.querySelector('h1') ||
+        document.querySelector('[data-qa="campaign-title"]') ||
+        document.querySelector('.campaign-title') ||
+        document.querySelector('meta[property="og:title"]');
+      
+      if (titleEl) {
+        title = titleEl.textContent || titleEl.getAttribute('content') || '';
+      }
+
+      // Extrair descrição
+      let description = '';
+      const descriptionEl = 
+        document.querySelector('[data-qa="campaign-description"]') ||
+        document.querySelector('.campaign-description') ||
+        document.querySelector('[class*="story"]') ||
+        document.querySelector('meta[property="og:description"]');
+      
+      if (descriptionEl) {
+        description = descriptionEl.textContent || descriptionEl.getAttribute('content') || '';
+      }
+
+      // Se não encontrou, procura em paragrafos grandes
+      if (!description) {
+        const paragraphs = Array.from(document.querySelectorAll('p'));
+        const largePara = paragraphs.find(p => (p.textContent || '').length > 100);
+        if (largePara) {
+          description = largePara.textContent || '';
+        }
+      }
+
+      // Extrair imagens - procura em TODOS os lugares possíveis
+      const imageSet = new Set<string>();
+
+      // 1. Em tags img
+      document.querySelectorAll('img').forEach(img => {
+        const src = img.src || img.getAttribute('data-src') || img.getAttribute('data-lazy-src');
+        if (src && src.startsWith('http')) {
+          imageSet.add(src);
+        }
+      });
+
+      // 2. Em tags picture
+      document.querySelectorAll('picture source').forEach(source => {
+        const srcset = source.getAttribute('srcset');
+        if (srcset) {
+          const urls = srcset.split(',').map(item => item.trim().split(' ')[0]);
+          urls.forEach(url => {
+            if (url && url.startsWith('http')) {
+              imageSet.add(url);
+            }
+          });
+        }
+      });
+
+      // 3. Em background-image CSS
+      document.querySelectorAll('[style*="background-image"]').forEach(el => {
+        const style = window.getComputedStyle(el);
+        const backgroundImage = style.backgroundImage;
+        if (backgroundImage) {
+          const urlMatch = backgroundImage.match(/url\(['"]?(.*?)['"]?\)/);
+          if (urlMatch && urlMatch[1] && urlMatch[1].startsWith('http')) {
+            imageSet.add(urlMatch[1]);
+          }
+        }
+      });
+
+      // 4. Em Open Graph meta tags
+      const ogImage = document.querySelector('meta[property="og:image"]')?.getAttribute('content');
+      if (ogImage && ogImage.startsWith('http')) {
+        imageSet.add(ogImage);
+      }
+
+      // 5. Em data attributes (comum em React)
+      document.querySelectorAll('[data-image], [data-src], [data-background]').forEach(el => {
+        const image = el.getAttribute('data-image') || 
+                     el.getAttribute('data-src') || 
+                     el.getAttribute('data-background');
+        if (image && image.startsWith('http')) {
+          imageSet.add(image);
+        }
+      });
+
+      // Filtrar imagens de navegação/ícones
+      const images = Array.from(imageSet).filter(url => {
+        const lower = url.toLowerCase();
+        return !lower.includes('logo') && 
+               !lower.includes('icon') && 
+               !lower.includes('gstatic') &&
+               !lower.includes('avatar') &&
+               !lower.includes('spinner');
+      }).slice(0, 10);
+
+      return { title, description, images };
+    });
+
+    let title = extractedData.title.trim();
+    let description = extractedData.description.trim();
+    let images = extractedData.images;
 
     // Remover "GoFundMe" do título se estiver lá
     title = title.replace(/\s*-\s*GoFundMe\s*$/i, '').trim();
 
-    // Extrair descrição - procura pelo story/description
-    let description = '';
-    
-    // Tentar vários seletores comuns no GoFundMe
-    const descriptionText = 
-      $('[data-qa="campaign-description"]').text() ||
-      $('.campaign-description').text() ||
-      $('[class*="story"]').first().text() ||
-      $('meta[property="og:description"]').attr('content') ||
-      $('p').filter((i, el) => $(el).text().length > 100).first().text() ||
-      '';
-
-    description = descriptionText.substring(0, 500).trim();
-
-    // Extrair imagens
-    const images: string[] = [];
-    
-    // Procura por images no atributo src e srcset
-    $('img').each((_, elem) => {
-      const src = $(elem).attr('src') || 
-                 $(elem).attr('data-src') ||
-                 $(elem).attr('data-lazy-src');
-      
-      if (src && src.startsWith('http') && images.length < 10) {
-        // Filtrar imagens de navegação/ícones
-        if (!src.includes('logo') && 
-            !src.includes('icon') &&
-            !src.includes('gstatic') &&
-            !src.includes('avatar') &&
-            !images.includes(src)) {
-          images.push(src);
-        }
-      }
-    });
-
-    // Se não encontrou muitas imagens, procurar em Open Graph
-    if (images.length < 3) {
-      const ogImage = $('meta[property="og:image"]').attr('content');
-      if (ogImage && ogImage.startsWith('http') && !images.includes(ogImage)) {
-        images.push(ogImage);
-      }
-    }
+    // Limitar descrição
+    description = description.substring(0, 500).trim();
 
     // Validar dados extraídos
     if (!title || title.length < 3) {
+      console.log('No title found. Extracted data:', { title, description: description.substring(0, 100), imagesCount: images.length });
       return res.status(400).json({
         success: false,
         title: '',
@@ -127,6 +182,13 @@ export default async function handler(
         message: 'Could not extract campaign title. Make sure the URL is correct and the campaign is public.'
       });
     }
+
+    console.log('✅ Successfully extracted GoFundMe data:', {
+      title: title.substring(0, 50),
+      descriptionLength: description.length,
+      imagesCount: images.length,
+      images: images.slice(0, 3)
+    });
 
     await browser.close();
 
