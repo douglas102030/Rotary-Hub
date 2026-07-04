@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
+import LoginModal from './LoginModal';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -13,6 +14,7 @@ const CURRENT_YEAR = 2026;
 
 const Layout: React.FC<LayoutProps> = ({ children, title = 'Rotary Ireland Hub' }) => {
   const { data: session } = useSession();
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -66,11 +68,18 @@ const Layout: React.FC<LayoutProps> = ({ children, title = 'Rotary Ireland Hub' 
                 </button>
               </>
             ) : (
-              <Link href="/login" className="btn-secondary">Login</Link>
+              <button 
+                onClick={() => setIsLoginModalOpen(true)}
+                className="btn-secondary"
+              >
+                Login
+              </button>
             )}
           </div>
         </div>
       </header>
+
+      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
 
       <main className="container mx-auto px-4 py-8">
         {children}
