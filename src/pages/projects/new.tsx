@@ -196,6 +196,7 @@ const NewProjectPage: React.FC = () => {
       const response = await fetch('/api/projects/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Send session cookies with the request
         body: JSON.stringify({
           ...formData,
           images: images
