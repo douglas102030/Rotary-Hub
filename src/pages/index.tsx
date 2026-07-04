@@ -311,49 +311,6 @@ const HomePage: React.FC = () => {
 
         </div>
       </section>
-
-      {/* CTA Section */}
-      <section className="py-24 bg-gradient-to-br from-gray-900 via-blue-950 to-gray-900 text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="w-full h-full bg-radial-dots-white-64" />
-        </div>
-
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl lg:text-5xl font-bold mb-6 leading-tight">
-              Ready to make a difference?
-            </h2>
-            
-            <p className="text-xl text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Start your Rotary project management journey today. Join our community and amplify your social impact with tools designed for you.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link 
-                href="/pre-access"
-                className="group inline-flex items-center px-8 py-5 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-bold rounded-xl shadow-2xl hover:shadow-yellow-500/50 transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-yellow-500"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 group-hover:rotate-180 transition-transform duration-700 ease-in-out" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                </svg>
-                Start Free Now
-              </Link>
-
-              <Link 
-                href="/pre-access?mode=contact&source=hero"
-                className="group inline-flex items-center px-8 py-5 bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold rounded-xl hover:bg-white/20 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-500"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 group-hover:-translate-y-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-5.368m0 5.368hM21 12l-7.5-7.5L22.5 9" />
-                </svg>
-                Contact Support
-              </Link>
-            </div>
-
-            <p className="text-gray-400 text-sm mt-6">Sem compromisso • Cancelamento a qualquer momento</p>
-          </div>
-        </div>
-      </section>
     </Layout>
   );
 };
