@@ -55,7 +55,7 @@ const PreAccessRequestsPage: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
             <h1 className="text-2xl font-bold text-red-800 mb-2">Access Denied</h1>
-            <p className="text-red-700 mb-4">You don't have permission to access this page.</p>
+            <p className="text-red-700 mb-4">You don&apos;t have permission to access this page.</p>
             <button
               onClick={() => router.push('/dashboard')}
               className="btn-primary"

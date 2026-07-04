@@ -10,11 +10,11 @@ interface LoginModalProps {
 
 const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const router = useRouter();
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (data: { username: string; password: string }) => {
-    setErrorMessage(null);
+    setErrorMessage(undefined);
     setIsLoading(true);
 
     try {
@@ -27,7 +27,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       if (result?.error) {
         setErrorMessage(result.error || 'Login failed. Please try again.');
       } else if (result?.ok) {
-        setErrorMessage(null);
+        setErrorMessage(undefined);
         onClose();
         router.push('/dashboard');
       }
@@ -74,7 +74,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         {/* Signup Link */}
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <button
               onClick={onClose}
               className="text-rotary-blue font-semibold hover:text-rotary-gold transition-colors"

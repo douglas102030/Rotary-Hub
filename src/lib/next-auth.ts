@@ -76,9 +76,6 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role ?? 'registered_user';
       }
       return session;
-    },
-    async signOut({ token }) {
-      return true;
     }
   },
   pages: {
