@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { unstable_getServerSession } from 'next-auth/next';
-import { authOptions } from './auth/[...nextauth]';
-import { db } from '../../lib/database';
+import { authOptions } from '../auth/[...nextauth]';
+import { db } from '../../../lib/database';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
