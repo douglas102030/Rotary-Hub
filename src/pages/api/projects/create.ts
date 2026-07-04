@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from 'next-auth/react';
+import { unstable_getServerSession } from 'next-auth/next';
+import { authOptions } from '../../../lib/next-auth';
 import { getDatabase } from '../../../lib/database';
 
 interface ProjectCreateRequest {
@@ -31,11 +32,14 @@ export default async function handler(
   }
 
   try {
-    // Check authentication
-    const session = await getSession({ req });
+    // Check authentication using unstable_getServerSession
+    const session = await unstable_getServerSession(req, res, authOptions);
     if (!session || !session.user) {
-      return res.status(401).json({ message: 'Unauthorized' });
+      console.error('Session check failed:', { session });
+      return res.status(401).json({ message: 'Unauthorized - No session found' });
     }
+
+    console.log('Session found:', { email: session.user.email, id: (session.user as any).id });
 
     const { title, clubName, category, location, description, status, startDate, endDate, fundraisingLink, externalLinks, contactPerson, images } = req.body as ProjectCreateRequest;
 
