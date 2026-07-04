@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { unstable_getServerSession } from 'next-auth/next';
 import { authOptions } from '../../../lib/next-auth';
-import { getDatabase } from '../../../lib/database';
+import { getDatebaseClient } from '../../../lib/database';
 
 interface ProjectCreateRequest {
   title: string;
@@ -48,7 +48,7 @@ export default async function handler(
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
-    const db = await getDatabase();
+    const db = getDatebaseClient();
 
     // Get user ID from database (by email)
     const userResult = await db.execute({
