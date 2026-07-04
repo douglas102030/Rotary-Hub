@@ -58,8 +58,8 @@ export default async function handler(
       timeout: 10000 
     }).catch(() => null);
 
-    // Esperar mais um pouco para lazy-loading
-    await page.waitForTimeout(2000);
+    // Esperar mais um pouco para lazy-loading completar
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     // Executar JavaScript para extrair dados mais confiáveis
     const extractedData = await page.evaluate(() => {
