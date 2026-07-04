@@ -69,20 +69,14 @@ export default async function handler(
       args: [title, clubName, category, location, description, status, startDate || null, endDate || null, fundraisingLink || null, externalLinks || null, contactPerson || null, userId]
     });
 
-    // Get the inserted project ID
-    let projectId: any;
-    if ((projectResult as any).metadata?.lastRowId) {
-      projectId = (projectResult as any).metadata.lastRowId;
-    } else if ((projectResult as any).lastInsertRowid) {
-      projectId = (projectResult as any).lastInsertRowid;
-    } else {
-      // Query to get the last inserted ID
-      const lastIdResult = await db.execute({
-        sql: 'SELECT last_insert_rowid() as id'
-      });
-      projectId = (lastIdResult.rows[0] as any).id;
-    }
+    console.log('Project result:', JSON.stringify(projectResult));
 
+    // Query to get the last inserted ID - this is the most reliable way with libSQL
+    const lastIdResult = await db.execute({
+      sql: 'SELECT last_insert_rowid() as id'
+    });
+
+    const projectId = (lastIdResult.rows[0] as any).id;
     console.log('Project created with ID:', projectId);
 
     // Insert project photos (if any)
