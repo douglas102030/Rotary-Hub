@@ -112,11 +112,21 @@ const PreAccessPage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      console.log('Submitted data:', formData);
-      
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      alert('Your request was sent successfully. You will receive a response by email soon.');
+      const response = await fetch('/api/pre-access-request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit request');
+      }
+
+      const data = await response.json();
+      alert('Your request was sent successfully! An administrator will review it and contact you soon.');
       
       setFormData({
         fullName: '',
@@ -129,7 +139,7 @@ const PreAccessPage: React.FC = () => {
       });
     } catch (error) {
       console.error('Error submitting form:', error);
-      alert('There was an error submitting your request. Please try again.');
+      alert(`There was an error submitting your request: ${error instanceof Error ? error.message : 'Please try again.'}`);
     } finally {
       setIsSubmitting(false);
     }
