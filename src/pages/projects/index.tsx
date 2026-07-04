@@ -1,7 +1,42 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '../../components/Layout';
 
+interface Project {
+  id: number;
+  title: string;
+  club_name: string;
+  category: string;
+  description: string;
+  status: string;
+  location: string;
+  main_image?: string;
+}
+
 const ProjectsPage: React.FC = () => {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchProjects() {
+      try {
+        const response = await fetch('/api/projects/list');
+        const data = await response.json();
+        
+        if (data.success) {
+          setProjects(data.projects || []);
+        } else {
+          setError(data.message || 'Failed to fetch projects');
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch projects');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchProjects();
+  }, []);
   return (
     <Layout title="Rotary Projects">
       <div className="max-w-7xl mx-auto">
@@ -40,21 +75,39 @@ const ProjectsPage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map((item) => (
-            <div key={item} className="card">
+          {loading && (
+            <div className="col-span-3 text-center py-8">
+              <p className="text-gray-600">Loading projects...</p>
+            </div>
+          )}
+          
+          {error && (
+            <div className="col-span-3 text-center py-8">
+              <p className="text-red-600">Error: {error}</p>
+            </div>
+          )}
+          
+          {!loading && !error && projects.length === 0 && (
+            <div className="col-span-3 text-center py-8">
+              <p className="text-gray-600">No projects found</p>
+            </div>
+          )}
+          
+          {!loading && !error && projects.map((project) => (
+            <div key={project.id} className="card">
               <div className="bg-gray-200 border-2 border-dashed rounded-xl w-full h-48 mb-4" />
-              <h3 className="text-lg font-bold text-rotary-blue mb-2">Sample Project {item}</h3>
+              <h3 className="text-lg font-bold text-rotary-blue mb-2">{project.title}</h3>
               <p className="text-gray-600 text-sm mb-3">
-                Brief description of sample project {item} showing how clubs can share their projects.
+                {project.description}
               </p>
               <div className="flex justify-between items-center">
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                  Active
+                  {project.status}
                 </span>
-                <span className="text-gray-500 text-sm">Sample Club {item}</span>
+                <span className="text-gray-500 text-sm">{project.club_name}</span>
               </div>
               <div className="mt-4">
-                <a href={`/projects/${item}`} className="text-rotary-blue hover:text-rotary-gold font-medium">
+                <a href={`/projects/${project.id}`} className="text-rotary-blue hover:text-rotary-gold font-medium">
                   View details
                 </a>
               </div>
