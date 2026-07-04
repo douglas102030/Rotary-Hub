@@ -30,8 +30,8 @@ export default async function handler(
 
     // Insert into access_requests table
     const result = db.execute(
-      'INSERT INTO access_requests (full_name, email, club_name, position, phone_number, country, message, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [fullName, email, clubName, position, phoneNumber, country, message, 'pending']
+      { sql: `INSERT INTO access_requests (full_name, email, club_name, position, phone_number, country, message, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, args: [fullName, email, clubName, position, phoneNumber, country, message, 'pending'] }
     );
 
     return res.status(201).json({ 

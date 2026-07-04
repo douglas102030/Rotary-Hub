@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { unstable_getServerSession } from 'next-auth/next';
-import { authOptions } from '../../lib/next-auth';
-import { getDatebaseClient } from '../../lib/database';
+import { authOptions } from '../../../lib/next-auth';
+import { getDatebaseClient } from '../../../lib/database';
 import bcrypt from 'bcryptjs';
 
 export default async function handler(
@@ -42,8 +42,7 @@ export default async function handler(
 
     // Check if email already exists
     const existingUser = db.execute(
-      'SELECT id FROM users WHERE email = ?',
-      [email]
+      { sql: 'SELECT id FROM users WHERE email = ?', args: [email] }
     );
 
     if (existingUser.rows && existingUser.rows.length > 0) {
@@ -54,11 +53,11 @@ export default async function handler(
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create user
-    const result = db.execute(
-      `INSERT INTO users (username, full_name, email, password_hash, role, is_active)
+    const result = db.execute({
+      sql: `INSERT INTO users (username, full_name, email, password_hash, role, is_active)
        VALUES (?, ?, ?, ?, ?, 1)`,
-      [email.split('@')[0], fullName, email, hashedPassword, role]
-    );
+      args: [email.split('@')[0], fullName, email, hashedPassword, role]
+    });
 
     return res.status(201).json({
       success: true,

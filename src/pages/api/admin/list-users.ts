@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { unstable_getServerSession } from 'next-auth/next';
-import { authOptions } from '../../lib/next-auth';
-import { getDatebaseClient } from '../../lib/database';
+import { authOptions } from '../../../lib/next-auth';
+import { getDatebaseClient } from '../../../lib/database';
 
 export default async function handler(
   req: NextApiRequest,
@@ -20,7 +20,7 @@ export default async function handler(
     const db = getDatebaseClient();
 
     const result = db.execute(
-      'SELECT id, username, full_name, email, club_name, position, role, is_active, created_at FROM users ORDER BY created_at DESC'
+      { sql: 'SELECT id, username, full_name, email, club_name, position, role, is_active, created_at FROM users ORDER BY created_at DESC' }
     );
 
     const users = result.rows || [];

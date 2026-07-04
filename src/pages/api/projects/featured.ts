@@ -1,9 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { db } from '../../../lib/database';
+import { getDatebaseClient } from '../../../lib/database';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
     try {
+      const db = getDatebaseClient();
+      
       // Buscar projetos marcados como featured (is_featured = true)
       const result = db.execute({
         sql: 'SELECT id, title, description, main_image FROM projects WHERE is_featured = 1 ORDER BY created_at DESC LIMIT 6',

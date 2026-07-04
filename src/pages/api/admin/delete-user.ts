@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { unstable_getServerSession } from 'next-auth/next';
-import { authOptions } from '../../lib/next-auth';
-import { getDatebaseClient } from '../../lib/database';
+import { authOptions } from '../../../lib/next-auth';
+import { getDatebaseClient } from '../../../lib/database';
 
 export default async function handler(
   req: NextApiRequest,
@@ -27,8 +27,7 @@ export default async function handler(
     if (session.user?.email) {
       const db = getDatebaseClient();
       const userResult = db.execute(
-        'SELECT email FROM users WHERE id = ?',
-        [userId]
+        { sql: 'SELECT email FROM users WHERE id = ?', args: [userId] }
       );
 
       if (userResult.rows && userResult.rows.length > 0) {
@@ -40,7 +39,9 @@ export default async function handler(
     }
 
     const db = getDatebaseClient();
-    db.execute('DELETE FROM users WHERE id = ?', [userId]);
+    db.execute(
+      { sql: 'DELETE FROM users WHERE id = ?', args: [userId] }
+    );
 
     return res.status(200).json({
       success: true,
